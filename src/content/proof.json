@@ -1,0 +1,38 @@
+[
+  {
+    "id": "cs-scale",
+    "label": "CS × Scale",
+    "claim": "Runs a large B2B book personally",
+    "number": "43",
+    "context": "B2B accounts I handle myself at Segwise.ai, as of Oct 2026. TODO: add a retention or expansion figure.",
+    "colour": "yolk",
+    "order": 1
+  },
+  {
+    "id": "zero-to-one",
+    "label": "Zero to one",
+    "claim": "Started Segwise's playable-ad business",
+    "number": "GM",
+    "context": "I started the line and run it as general manager. TODO: revenue or client count.",
+    "colour": "teal",
+    "order": 2
+  },
+  {
+    "id": "product-building",
+    "label": "Product × Building",
+    "claim": "Ships production features by directing AI coding agents",
+    "number": "TODO",
+    "context": "TODO: features shipped, PRs merged or GitHub contributions.",
+    "colour": "card",
+    "order": 3
+  },
+  {
+    "id": "growth",
+    "label": "Growth",
+    "claim": "Growth & acquisition at FamPay",
+    "number": "TODO",
+    "context": "Associate Product Manager, Jun 2022 – Aug 2023. TODO: acquisition metric.",
+    "colour": "tomato",
+    "order": 4
+  }
+]

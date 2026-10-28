@@ -1,0 +1,39 @@
+---
+// Section heading styled like a menu course: small course label, big title, ruled line.
+interface Props {
+  course?: string;
+  title: string;
+  level?: 'h1' | 'h2';
+  id?: string;
+}
+const { course, title, level = 'h2', id } = Astro.props;
+const Tag = level;
+---
+
+<div class="menu-header">
+  {course && <p class="label course">{course}</p>}
+  <Tag id={id} class:list={['title', level]}>{title}</Tag>
+  <div class="rule" aria-hidden="true"></div>
+</div>
+
+<style>
+  .menu-header {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .course {
+    color: var(--ink-soft);
+  }
+  .title.h1 {
+    font-size: clamp(2.8rem, 9vw, 6rem);
+  }
+  .title.h2 {
+    font-size: clamp(2rem, 5.5vw, 3.5rem);
+  }
+  .rule {
+    height: 10px;
+    border-top: var(--line) solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    max-width: 12rem;
+  }
+</style>

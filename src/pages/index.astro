@@ -1,0 +1,167 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DishCard from '../components/DishCard.astro';
+import MenuHeader from '../components/MenuHeader.astro';
+import Sticker from '../components/Sticker.astro';
+import Todo from '../components/Todo.astro';
+import { site } from '../config/site';
+
+const proof = (await getCollection('proof')).sort((a, b) => a.data.order - b.data.order);
+const tilts = [-1.5, 1, -0.5, 1.5];
+
+// Split the headline so the highlighted phrase gets the yolk marker.
+const [before, after] = site.headline.split(site.headlineHighlight);
+---
+
+<BaseLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="container-page hero-inner">
+      <p class="label">The Menu · {site.name}</p>
+      <h1 id="hero-title">
+        {before}<mark>{site.headlineHighlight}</mark>{after}
+      </h1>
+      <p class="bio">{site.bio}</p>
+      <div class="meta">
+        <span class="chip"><span class="dot" aria-hidden="true"></span>{site.location} · {site.availability}</span>
+        <span class="roles">Looking at: {site.targetRoles.join(' · ')}</span>
+      </div>
+      <div class="ctas">
+        <a href="/work/" class="btn btn-hot">See the Mains →</a>
+        <a href="#book" class="btn">Book a Table</a>
+      </div>
+      <Sticker name="shipped" size={132} rotate={12} class="hero-sticker" />
+    </div>
+  </section>
+
+  <section class="proof" aria-labelledby="proof-title">
+    <div class="container-page proof-inner">
+      <MenuHeader course="Starters" title="The proof" id="proof-title" />
+      <div class="cards">
+        {proof.map(({ data }, i) => <DishCard {...data} tilt={tilts[i % tilts.length]} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="looking" aria-labelledby="looking-title">
+    <div class="container-page looking-inner">
+      <MenuHeader course="Chef's table" title="What I'm looking for" id="looking-title" />
+      <p class="looking-copy"><Todo text={site.lookingFor} /></p>
+      <Sticker name="passport" size={150} rotate={-6} class="passport" />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero-inner {
+    position: relative;
+    display: grid;
+    gap: 1.4rem;
+    padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem);
+  }
+  h1 {
+    font-size: clamp(2.6rem, 8.2vw, 6.4rem);
+    max-width: 13ch;
+  }
+  h1 mark {
+    background: var(--yolk);
+    color: inherit;
+    padding-inline: 0.06em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+  .bio {
+    max-width: 52ch;
+    font-size: 1.15rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    background: var(--card);
+    border: var(--line-thin) solid var(--ink);
+    padding: 0.3em 0.8em;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+  }
+  .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--teal);
+    border: 1.5px solid var(--ink);
+  }
+  .roles {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+  }
+  .hero-inner :global(.hero-sticker) {
+    position: absolute;
+    right: var(--gutter);
+    top: clamp(2rem, 6vw, 4.5rem);
+  }
+  @media (max-width: 860px) {
+    .hero-inner :global(.hero-sticker) {
+      width: 84px;
+      height: 84px;
+      top: 1.25rem;
+    }
+  }
+
+  .proof {
+    background: var(--paper-deep);
+    border-top: var(--line) solid var(--ink);
+  }
+  .proof-inner {
+    display: grid;
+    gap: 2rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  @media (min-width: 600px) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1040px) {
+    .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .looking-inner {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .looking-copy {
+    max-width: var(--measure);
+    font-size: 1.2rem;
+  }
+  .looking-inner :global(.passport) {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 2rem;
+  }
+  @media (max-width: 860px) {
+    .looking-inner :global(.passport) {
+      display: none;
+    }
+  }
+</style>

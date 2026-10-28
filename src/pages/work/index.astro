@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DishCard from '../../components/DishCard.astro';
+import MenuHeader from '../../components/MenuHeader.astro';
+
+const work = (await getCollection('work', ({ data }) => !data.draft)).sort((a, b) => a.data.order - b.data.order);
+const colours = ['yolk', 'card', 'teal'] as const;
+---
+
+<BaseLayout title="Mains" description="Case studies from Mohamed Shayan, written as dishes: ingredients, method, what was served, and one lesson.">
+  <div class="container-page page">
+    <MenuHeader course="Mains" title="The work" level="h1" />
+    <p class="intro">Each case study is plated the same way: the ingredients, the method, what was served, and a chef's note.</p>
+    <div class="cards">
+      {work.map((entry, i) => (
+        <DishCard
+          href={`/work/${entry.id}/`}
+          label={entry.data.label}
+          claim={entry.data.title}
+          number={entry.data.number}
+          context={entry.data.summary}
+          colour={colours[i % colours.length]}
+        />
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    display: grid;
+    gap: 1.75rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .intro {
+    max-width: 52ch;
+    font-size: 1.15rem;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1.5rem;
+  }
+</style>

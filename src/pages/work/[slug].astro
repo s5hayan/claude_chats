@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Todo from '../../components/Todo.astro';
+
+export async function getStaticPaths() {
+  const work = await getCollection('work', ({ data }) => !data.draft);
+  return work.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, label, number, numberCaption, summary } = entry.data;
+---
+
+<BaseLayout title={title} description={summary.includes('TODO') ? undefined : summary}>
+  <article class="container-page dish">
+    <a href="/work/" class="back label">← All mains</a>
+    <header class="dish-head">
+      <p class="label">{label}</p>
+      <h1>{title}</h1>
+      <p class="summary"><Todo text={summary} /></p>
+      <div class="plate">
+        <span class="num"><Todo text={number} /></span>
+        <span class="cap"><Todo text={numberCaption} /></span>
+      </div>
+    </header>
+    <div class="prose-menu body">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .dish {
+    display: grid;
+    gap: 2rem;
+    padding-block: clamp(2rem, 5vw, 4rem);
+  }
+  .back {
+    text-decoration: none;
+    width: fit-content;
+  }
+  .back:hover {
+    text-decoration: underline;
+  }
+  .dish-head {
+    display: grid;
+    gap: 1rem;
+  }
+  h1 {
+    font-size: clamp(2.4rem, 7vw, 5rem);
+    max-width: 16ch;
+  }
+  .summary {
+    max-width: 52ch;
+    font-size: 1.15rem;
+  }
+  .plate {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+    width: fit-content;
+    max-width: 100%;
+    background: var(--yolk);
+    border: var(--line) solid var(--ink);
+    box-shadow: var(--shadow);
+    padding: 0.8rem 1.2rem;
+  }
+  .num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 3.5rem);
+    line-height: 1;
+  }
+  .cap {
+    font-weight: 600;
+  }
+  .body :global(h2) {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+  }
+  .body :global(h2)::before {
+    content: '';
+    width: 0.55em;
+    height: 0.55em;
+    background: var(--tomato);
+    border: var(--line-thin) solid var(--ink);
+    flex-shrink: 0;
+  }
+</style>

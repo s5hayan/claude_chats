@@ -1,0 +1,107 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MenuHeader from '../components/MenuHeader.astro';
+import Sticker from '../components/Sticker.astro';
+import Todo from '../components/Todo.astro';
+
+const sides = (await getCollection('sides')).sort((a, b) => a.data.order - b.data.order);
+const kindColour: Record<string, string> = {
+  Food: 'var(--tomato)',
+  Newsletter: 'var(--yolk)',
+  Build: 'var(--teal)',
+  Tool: 'var(--teal)',
+  Community: 'var(--yolk)',
+};
+---
+
+<BaseLayout title="Side Dishes" description="Food walks, pop-ups, the See Hear Taste newsletter, hackathon builds and small tools by Mohamed Shayan.">
+  <div class="container-page page">
+    <div class="head">
+      <MenuHeader course="Side Dishes" title="Off the main menu" level="h1" />
+      <Sticker name="cricket-ball" size={100} rotate={-12} class="ball" />
+    </div>
+    <p class="intro">Food, writing and things I build when nobody's asked me to.</p>
+    <ul class="list">
+      {sides.map(({ data }) => (
+        <li class="item">
+          <span class="kind" style={`background: ${kindColour[data.kind]}`}>{data.kind}</span>
+          <h2>{data.link ? <a href={data.link}>{data.title} ↗</a> : data.title}</h2>
+          <p><Todo text={data.blurb} /></p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .page {
+    display: grid;
+    gap: 1.75rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .head {
+    position: relative;
+  }
+  .head :global(.ball) {
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  @media (max-width: 640px) {
+    .head :global(.ball) {
+      width: 64px;
+      height: 64px;
+    }
+  }
+  .intro {
+    max-width: 52ch;
+    font-size: 1.15rem;
+  }
+  .list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: var(--line) solid var(--ink);
+  }
+  .item {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 0.4rem 1.5rem;
+    align-items: baseline;
+    padding-block: 1.25rem;
+    border-bottom: var(--line-thin) solid var(--ink);
+  }
+  .item p {
+    grid-column: 2;
+    max-width: 60ch;
+  }
+  .kind {
+    grid-row: span 2;
+    justify-self: start;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: var(--line-thin) solid var(--ink);
+    padding: 0.2em 0.6em;
+  }
+  h2 {
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+  }
+  h2 a {
+    text-decoration-color: var(--tomato);
+  }
+  @media (max-width: 560px) {
+    .item {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .item p {
+      grid-column: 1;
+    }
+    .kind {
+      grid-row: auto;
+    }
+  }
+</style>

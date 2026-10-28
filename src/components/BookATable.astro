@@ -1,0 +1,86 @@
+---
+import { site } from '../config/site';
+import Sticker from './Sticker.astro';
+import Todo from './Todo.astro';
+
+const { email, linkedin, github } = site.contact;
+const ready = (value: string) => !value.includes('TODO');
+---
+
+<section id="book" class="book" aria-labelledby="book-title">
+  <div class="container-page inner">
+    <div class="copy">
+      <p class="label">Reservations</p>
+      <h2 id="book-title">Book a Table</h2>
+      <p class="lede">
+        Hiring for {site.targetRoles.slice(0, -1).join(', ')} or {site.targetRoles.at(-1)}? Want to collab, or
+        come on a food walk? Pull up a chair.
+      </p>
+    </div>
+    <ul class="links">
+      <li>
+        {ready(email) ? (
+          <a class="btn btn-yolk" href={`mailto:${email}`}>{email}</a>
+        ) : (
+          <span class="btn"><Todo text={email} /></span>
+        )}
+      </li>
+      <li>
+        {ready(linkedin) ? (
+          <a class="btn" href={linkedin} rel="me">LinkedIn ↗</a>
+        ) : (
+          <span class="btn"><Todo text={linkedin} /></span>
+        )}
+      </li>
+      <li>
+        <a class="btn" href={github} rel="me">GitHub ↗</a>
+      </li>
+    </ul>
+    <Sticker name="chilli" size={110} rotate={14} class="chilli" />
+  </div>
+</section>
+
+<style>
+  .book {
+    background: var(--tomato);
+    border-block: var(--line) solid var(--ink);
+  }
+  .inner {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .copy {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 40rem;
+  }
+  h2 {
+    font-size: clamp(2.8rem, 9vw, 6rem);
+  }
+  .lede {
+    font-size: 1.15rem;
+    font-weight: 500;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .inner :global(.chilli) {
+    position: absolute;
+    right: var(--gutter);
+    top: 1.5rem;
+  }
+  @media (max-width: 640px) {
+    .inner :global(.chilli) {
+      width: 70px;
+      height: 70px;
+      top: 1rem;
+    }
+  }
+</style>

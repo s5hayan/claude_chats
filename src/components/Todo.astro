@@ -1,0 +1,24 @@
+---
+// Renders copy, flagging any "TODO" text with a highlighter so gaps are obvious.
+// `npm run check:todo` fails if any of these reach the built site.
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+const isTodo = text.includes('TODO');
+---
+
+{isTodo ? <mark class="todo">{text}</mark> : text}
+
+<style>
+  .todo {
+    background: repeating-linear-gradient(-45deg, #ffe066 0 8px, #fff1a8 8px 16px);
+    color: var(--ink);
+    outline: 2px dashed var(--ink);
+    outline-offset: 1px;
+    font-family: var(--font-mono);
+    font-size: 0.8em;
+    letter-spacing: 0;
+    padding: 0 0.25em;
+  }
+</style>
