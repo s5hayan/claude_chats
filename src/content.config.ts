@@ -21,7 +21,7 @@ const sides = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/sides' }),
   schema: z.object({
     title: z.string(),
-    kind: z.enum(['Food', 'Newsletter', 'Build', 'Tool', 'Community']),
+    kind: z.enum(['Food', 'Newsletter', 'Build', 'Tool', 'Writing', 'Community']),
     blurb: z.string(),
     link: z.url().optional(),
     order: z.number(),

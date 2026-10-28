@@ -2,36 +2,36 @@
   {
     "id": "cs-scale",
     "label": "CS × Scale",
-    "claim": "Runs a large B2B book personally",
+    "claim": "B2B accounts I run personally",
     "number": "43",
-    "context": "B2B accounts I handle myself at Segwise.ai, as of Oct 2026. TODO: add a retention or expansion figure.",
+    "context": "Onboarding, pilots, renewals and escalations for gaming, app and D2C brands at Segwise.ai, as of Oct 2026.",
     "colour": "yolk",
     "order": 1
   },
   {
-    "id": "zero-to-one",
-    "label": "Zero to one",
-    "claim": "Started Segwise's playable-ad business",
-    "number": "GM",
-    "context": "I started the line and run it as general manager. TODO: revenue or client count.",
-    "colour": "teal",
+    "id": "product-building",
+    "label": "Product × Building",
+    "claim": "PRs merged to production",
+    "number": "188",
+    "context": "Across 19 repos, Jan–Sep 2026, built by directing AI coding agents. Every one reviewed by an engineer.",
+    "colour": "card",
     "order": 2
   },
   {
-    "id": "product-building",
-    "label": "Product × Building",
-    "claim": "Ships production features by directing AI coding agents",
-    "number": "TODO",
-    "context": "TODO: features shipped, PRs merged or GitHub contributions.",
-    "colour": "card",
+    "id": "zero-to-one",
+    "label": "Zero to one",
+    "claim": "Playable ads shipped by a business I started",
+    "number": "17",
+    "context": "I run Segwise's playable-ad line as GM: 10 client games, with automated QA across 9 ad networks.",
+    "colour": "teal",
     "order": 3
   },
   {
     "id": "growth",
     "label": "Growth",
-    "claim": "Growth & acquisition at FamPay",
-    "number": "TODO",
-    "context": "Associate Product Manager, Jun 2022 – Aug 2023. TODO: acquisition metric.",
+    "claim": "Activation at FamPay, with CAC flat",
+    "number": "4×",
+    "context": "I redesigned onboarding (signup-to-KYC up more than 60%), then ran the growth experiments that followed.",
     "colour": "tomato",
     "order": 4
   }

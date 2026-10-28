@@ -7,15 +7,15 @@ export const site = {
   headline: 'I take the customer call, write the spec, and ship the feature.',
   // Words in the headline to highlight in yolk
   headlineHighlight: 'ship the feature.',
-  bio: 'Head of Product & Customer Success at Segwise.ai. First non-engineering hire on a four-person team, still the one pushing to production.',
+  bio: 'Head of Product & Customer Success at Segwise.ai, an AI platform that shows performance marketers why their ads work. I joined as the first non-engineering hire on a four-person team. Now I run 43 accounts and ship a lot of what they ask for myself.',
   location: 'Bengaluru',
   availability: 'Open to remote and relocation',
   targetRoles: ['Customer Success', 'Product Management', 'Product Strategy', 'GTM Engineering'],
   lookingFor:
-    "TODO: one short paragraph on the team, stage and problem you want next, and what you'd bring in the first 90 days.",
+    'An early-stage B2B SaaS team, ideally in AI, where one person can own the whole customer loop: talk to customers, turn what they say into product, ship it, and grow the account. I am looking at Product Management, Customer Success, Product Strategy and GTM Engineering roles, from Bengaluru, remote, or somewhere new.',
   contact: {
-    email: 'TODO@example.com',
-    linkedin: 'TODO: LinkedIn URL',
+    email: 'mohamedshayan5@gmail.com',
+    linkedin: 'https://www.linkedin.com/in/mohamed-shayan-22071998/',
     github: 'https://github.com/s5hayan',
   },
   nav: [

@@ -1,6 +1,6 @@
 ---
 title: Samiksha Foundation
 kind: Community
-blurb: "Volunteer educator since 2024. TODO: what you teach and to whom."
-order: 6
+blurb: Volunteer educator since 2024. I teach children from kindergarten to Grade 6 while they're in cancer treatment, so they can keep up with school.
+order: 8
 ---

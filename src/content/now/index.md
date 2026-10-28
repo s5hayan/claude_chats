@@ -5,8 +5,8 @@ location: Bengaluru
 
 ## Working on
 
+- Growing Segwise's playable-ad business.
 - This site, built by directing Claude Code.
-- TODO: what you're focused on at Segwise this month.
 
 ## Eating
 
