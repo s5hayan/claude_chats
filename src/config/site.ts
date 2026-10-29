@@ -1,5 +1,9 @@
 // Site-wide copy and links. Edit here; pages read from this file.
+export type Variant = 'ramen' | 'diner';
+
 export const site = {
+  // Which look the whole site uses: 'ramen' (Late-Night Ramen) or 'diner' (Diner Special).
+  variant: 'ramen' as Variant,
   name: 'Mohamed Shayan',
   shortName: 'Shayan',
   description:

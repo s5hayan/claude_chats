@@ -65,7 +65,7 @@ const [before, after] = site.headline.split(site.headlineHighlight);
   }
   h1 mark {
     background: var(--yolk);
-    color: inherit;
+    color: var(--on-accent);
     padding-inline: 0.06em;
     box-decoration-break: clone;
     -webkit-box-decoration-break: clone;
@@ -84,8 +84,9 @@ const [before, after] = site.headline.split(site.headlineHighlight);
     display: inline-flex;
     align-items: center;
     gap: 0.55em;
-    background: var(--card);
-    border: var(--line-thin) solid var(--ink);
+    background: var(--surface);
+    color: var(--on-surface);
+    border: var(--line-thin) solid var(--edge);
     padding: 0.3em 0.8em;
     font-family: var(--font-mono);
     font-size: 0.8rem;
@@ -95,11 +96,11 @@ const [before, after] = site.headline.split(site.headlineHighlight);
     height: 0.6rem;
     border-radius: 50%;
     background: var(--teal);
-    border: 1.5px solid var(--ink);
+    border: 1.5px solid var(--edge);
   }
   .roles {
     font-size: 0.95rem;
-    color: var(--ink-soft);
+    color: var(--fg-muted);
   }
   .ctas {
     display: flex;
@@ -120,8 +121,8 @@ const [before, after] = site.headline.split(site.headlineHighlight);
   }
 
   .proof {
-    background: var(--paper-deep);
-    border-top: var(--line) solid var(--ink);
+    background: var(--bg-alt);
+    border-top: var(--line) solid var(--edge);
   }
   .proof-inner {
     display: grid;

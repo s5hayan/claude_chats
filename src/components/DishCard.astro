@@ -27,18 +27,23 @@ const Tag = href ? 'a' : 'article';
     display: grid;
     gap: 0.5rem;
     align-content: start;
-    background: var(--card);
-    border: var(--line) solid var(--ink);
+    background: var(--surface);
+    border: var(--line) solid var(--edge);
     box-shadow: var(--shadow);
     padding: 1.1rem 1.1rem 1.25rem;
     text-decoration: none;
-    color: var(--ink);
+    color: var(--on-surface);
     transform: rotate(var(--tilt));
     transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
   .dish:hover {
     transform: translate(-3px, -3px) rotate(calc(var(--tilt) - 1deg));
     box-shadow: var(--shadow-lift);
+  }
+  .c-yolk,
+  .c-teal,
+  .c-tomato {
+    color: var(--on-accent);
   }
   .c-yolk {
     background: var(--yolk);

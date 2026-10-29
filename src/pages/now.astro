@@ -27,13 +27,14 @@ const updated = entry.data.updated.toLocaleDateString('en-GB', { day: 'numeric',
   }
   .board {
     width: fit-content;
-    background: var(--ink);
+    background: var(--inverse-bg);
     color: var(--yolk);
     padding: 0.4em 0.8em;
   }
   .specials :global(h2) {
     background: var(--yolk);
-    border: var(--line-thin) solid var(--ink);
+    color: var(--on-accent);
+    border: var(--line-thin) solid var(--edge);
     width: fit-content;
     padding: 0.1em 0.3em;
     font-size: clamp(1.5rem, 4vw, 2rem);

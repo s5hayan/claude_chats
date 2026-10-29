@@ -1,8 +1,12 @@
 /*
- * Design tokens: Direction A, "Diner Special".
- * Brutalist pop menu: cream paper, ink outlines, flat colour blocks, hard shadows.
- * This is the one place to change colours and fonts. `@theme static` makes each
- * value both a Tailwind utility (bg-tomato, font-display) and a CSS variable.
+ * Design tokens. This is the one place to change colours and fonts.
+ *
+ * Two looks share every component; `variant` in src/config/site.ts picks one
+ * and sets <html data-variant="...">.
+ *   diner: "Diner Special". Brutalist pop menu: cream paper, ink outlines, hard shadows.
+ *   ramen: "Late-Night Ramen". A dim ramen bar: ink-dark room, neon red, order slips.
+ *
+ * `@theme static` makes the palette both Tailwind utilities (bg-tomato) and CSS variables.
  */
 @theme static {
   --color-paper: #fff4e0;
@@ -14,31 +18,83 @@
   --color-yolk: #ffd60a;
   --color-teal: #00a39a;
 
+  --color-night: #15110f;
+  --color-night-deep: #0c0a09;
+  --color-wood: #2a1e18;
+  --color-wood-light: #4a372c;
+  --color-broth: #f3e6cf;
+  --color-broth-muted: #cdbfa8;
+  --color-neon: #ff4a2e;
+  --color-lantern: #ffc93c;
+  --color-scallion: #3fbf8f;
+
   --font-display: 'Bricolage Grotesque Variable', 'Arial Black', Impact, sans-serif;
   --font-body: 'Instrument Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
 }
 
+/* Diner Special (also the fallback when no variant is set) */
 :root {
-  /* Short aliases for component styles */
-  --paper: var(--color-paper);
-  --paper-deep: var(--color-paper-deep);
-  --ink: var(--color-ink);
-  --ink-soft: var(--color-ink-soft);
-  --card: var(--color-card);
+  --bg: var(--color-paper);
+  --bg-alt: var(--color-paper-deep);
+  --fg: var(--color-ink);
+  --fg-muted: var(--color-ink-soft);
+  --surface: var(--color-card);
+  --on-surface: var(--color-ink);
+  --edge: var(--color-ink);
+  --shadow-colour: var(--color-ink);
+  --inverse-bg: var(--color-ink);
+  --inverse-fg: var(--color-paper);
+  --inverse-muted: var(--color-paper-deep);
+
+  /* Accents, and the text colour that sits on them */
   --tomato: var(--color-tomato);
   --yolk: var(--color-yolk);
   --teal: var(--color-teal);
+  --on-accent: var(--color-ink);
+
+  --glow: none;
 
   /* Lines and shadows */
   --line: 3px;
   --line-thin: 2px;
-  --shadow: 5px 5px 0 var(--ink);
-  --shadow-sm: 3px 3px 0 var(--ink);
-  --shadow-lift: 8px 8px 0 var(--ink);
+  --shadow: 5px 5px 0 var(--shadow-colour);
+  --shadow-sm: 3px 3px 0 var(--shadow-colour);
+  --shadow-lift: 8px 8px 0 var(--shadow-colour);
 
   /* Layout */
   --measure: 65ch;
   --page-max: 1120px;
   --gutter: max(16px, 4vw);
+  --rail: 0px;
+}
+
+/* Late-Night Ramen */
+:root[data-variant='ramen'] {
+  color-scheme: dark;
+  --bg: var(--color-night);
+  --bg-alt: var(--color-wood);
+  --fg: var(--color-broth);
+  --fg-muted: var(--color-broth-muted);
+  --surface: var(--color-wood);
+  --on-surface: var(--color-broth);
+  --edge: var(--color-wood-light);
+  --shadow-colour: var(--color-night-deep);
+  --inverse-bg: var(--color-night-deep);
+  --inverse-fg: var(--color-broth);
+  --inverse-muted: var(--color-broth-muted);
+
+  --tomato: var(--color-neon);
+  --yolk: var(--color-lantern);
+  --teal: var(--color-scallion);
+  --on-accent: var(--color-night);
+
+  --font-display: 'Dela Gothic One', 'Arial Black', Impact, sans-serif;
+  --glow: 0 0 18px rgb(255 74 46 / 0.55);
+  --rail: 64px;
+}
+@media (max-width: 860px) {
+  :root[data-variant='ramen'] {
+    --rail: 0px;
+  }
 }

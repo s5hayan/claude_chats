@@ -3,8 +3,8 @@
 
 @layer base {
   html {
-    background: var(--paper);
-    color: var(--ink);
+    background: var(--bg);
+    color: var(--fg);
     font-family: var(--font-body);
     font-size: 17px;
     line-height: 1.55;
@@ -35,7 +35,7 @@
   }
   ::selection {
     background: var(--yolk);
-    color: var(--ink);
+    color: var(--on-accent);
   }
   :focus-visible {
     outline: 3px solid var(--tomato);
@@ -64,25 +64,28 @@
     gap: 0.5em;
     font-weight: 600;
     text-decoration: none;
-    border: var(--line-thin) solid var(--ink);
+    border: var(--line-thin) solid var(--edge);
     padding: 0.55em 1.1em;
-    background: var(--card);
+    background: var(--surface);
+    color: var(--on-surface);
     box-shadow: var(--shadow-sm);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
   }
   .btn:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--ink);
+    box-shadow: 5px 5px 0 var(--shadow-colour);
   }
   .btn:active {
     transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--ink);
+    box-shadow: 1px 1px 0 var(--shadow-colour);
   }
   .btn-hot {
     background: var(--tomato);
+    color: var(--on-accent);
   }
   .btn-yolk {
     background: var(--yolk);
+    color: var(--on-accent);
   }
   /* Long-form text from MDX */
   .prose-menu {

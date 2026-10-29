@@ -1,7 +1,12 @@
 # Shayan's personal site
 
-Phase 1 of the site described in the build brief: a restaurant-menu personal site in the
-"Diner Special" direction (brutalist pop: cream paper, ink outlines, tomato, yolk and teal).
+Phase 1 of the site described in the build brief: a restaurant-menu personal site with two looks.
+
+- **Late-Night Ramen** (`ramen`, current): a dim ramen bar. Ink-dark room, neon red, a noren
+  curtain down the left edge, and proof cards as torn order slips.
+- **Diner Special** (`diner`): brutalist pop. Cream paper, ink outlines, tomato, yolk and teal.
+
+Switch with `variant` in `src/config/site.ts`.
 
 Built with Astro, Tailwind CSS and MDX. Static output, ready for Vercel.
 
@@ -24,7 +29,9 @@ npm run check:todo # fails while any TODO placeholder is still on the built site
 | Mains (case studies) | `src/content/work/*.mdx` |
 | Side Dishes | `src/content/sides/*.md` |
 | Today's Specials | `src/content/now/index.md` |
-| Colours and fonts | `src/styles/tokens.css` |
+| Which look the site uses | `variant` in `src/config/site.ts` |
+| Colours and fonts, per look | `src/styles/tokens.css` |
+| Ramen-only layout touches | `src/styles/ramen.css` |
 | Stickers | `public/stickers/*.svg` |
 
 Any text containing `TODO` is highlighted on the page so gaps are easy to spot.

@@ -11,7 +11,7 @@ const kindColour: Record<string, string> = {
   Newsletter: 'var(--yolk)',
   Build: 'var(--teal)',
   Tool: 'var(--teal)',
-  Writing: 'var(--card)',
+  Writing: 'var(--yolk)',
   Community: 'var(--yolk)',
 };
 ---
@@ -64,7 +64,7 @@ const kindColour: Record<string, string> = {
     margin: 0;
     padding: 0;
     list-style: none;
-    border-top: var(--line) solid var(--ink);
+    border-top: var(--line) solid var(--edge);
   }
   .item {
     display: grid;
@@ -72,7 +72,7 @@ const kindColour: Record<string, string> = {
     gap: 0.4rem 1.5rem;
     align-items: baseline;
     padding-block: 1.25rem;
-    border-bottom: var(--line-thin) solid var(--ink);
+    border-bottom: var(--line-thin) solid var(--edge);
   }
   .item p {
     grid-column: 2;
@@ -85,8 +85,9 @@ const kindColour: Record<string, string> = {
     font-size: 0.72rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    border: var(--line-thin) solid var(--ink);
+    border: var(--line-thin) solid var(--edge);
     padding: 0.2em 0.6em;
+    color: var(--on-accent);
   }
   h2 {
     font-size: clamp(1.6rem, 4vw, 2.4rem);
