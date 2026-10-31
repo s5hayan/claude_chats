@@ -37,9 +37,20 @@ const [before, after] = site.headline.split(site.headlineHighlight);
   <section class="proof" aria-labelledby="proof-title">
     <div class="container-page proof-inner">
       <MenuHeader course="Starters" title="The proof" id="proof-title" />
+      <p class="proof-intro">{site.proofIntro}</p>
       <div class="cards">
         {proof.map(({ data }, i) => <DishCard {...data} tilt={tilts[i % tilts.length]} />)}
       </div>
+    </div>
+  </section>
+
+  <section class="rules" aria-labelledby="rules-title">
+    <div class="container-page rules-inner">
+      <MenuHeader course="Please note" title="House rules" id="rules-title" />
+      <ol class="rule-list">
+        {site.houseRules.map((rule) => <li>{rule}</li>)}
+      </ol>
+      <Sticker name="cricket-ball" size={96} rotate={-10} class="ball" />
     </div>
   </section>
 
@@ -60,8 +71,8 @@ const [before, after] = site.headline.split(site.headlineHighlight);
     padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem);
   }
   h1 {
-    font-size: clamp(2.6rem, 8.2vw, 6.4rem);
-    max-width: 13ch;
+    font-size: clamp(2.4rem, 6.6vw, 5.2rem);
+    max-width: 17ch;
   }
   h1 mark {
     background: var(--yolk);
@@ -142,6 +153,59 @@ const [before, after] = site.headline.split(site.headlineHighlight);
   @media (min-width: 1040px) {
     .cards {
       grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .proof-intro {
+    max-width: 58ch;
+    font-size: 1.1rem;
+    color: var(--fg-muted);
+  }
+
+  .rules {
+    border-top: var(--line) solid var(--edge);
+  }
+  .rules-inner {
+    position: relative;
+    display: grid;
+    gap: 1.75rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+  .rule-list {
+    counter-reset: rule;
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-width: 62ch;
+  }
+  .rule-list li {
+    counter-increment: rule;
+    display: grid;
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: baseline;
+    font-size: 1.2rem;
+    line-height: 1.5;
+  }
+  .rule-list li::before {
+    content: counter(rule, decimal-leading-zero);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--tomato);
+    text-shadow: var(--glow);
+  }
+  .rules-inner :global(.ball) {
+    position: absolute;
+    right: var(--gutter);
+    top: 2.5rem;
+  }
+  @media (max-width: 860px) {
+    .rules-inner :global(.ball) {
+      display: none;
     }
   }
 
