@@ -1,0 +1,790 @@
+<title>Shayan's Counter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Monoton&family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: a sticky full-screen stage; scrolling walks a camera through layered
+   flat illustrations (outside → curtain → room → your seat at the counter). */
+:root {
+  color-scheme: dark;
+  --night: #170f1a;      /* the street at night */
+  --ink: #1d1018;        /* every outline */
+  --curtain: #c8202f;
+  --lamp: #ffc857;       /* warm restaurant light */
+  --neon: #ff5d8f;
+  --cream: #fff1d6;
+  --muted: #d9c3a5;
+  --teal: #43d1c0;
+  --panel: #fff6e6;
+  --panel-ink: #2a1a20;
+
+  --display: 'Bagel Fat One', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  --neon-font: 'Monoton', 'Bagel Fat One', sans-serif;
+  --body: 'Nunito', 'Trebuchet MS', system-ui, sans-serif;
+  --hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+}
+html, body { background: var(--night); color: var(--cream); }
+body { font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.scroller { height: 720vh; position: relative; }
+.stage {
+  position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
+  background: var(--night);
+}
+.layer { position: absolute; inset: 0; will-change: transform, opacity; transform-origin: 50% 60%; }
+.layer svg { width: 100%; height: 100%; display: block; }
+.interior { transform-origin: 50% 55%; }
+.interior .layer { transform-origin: 50% 55%; }
+.amber {
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 42%, rgb(255 170 70 / 0) 0%, rgb(255 140 40 / .12) 55%, rgb(12 5 2 / .78) 100%),
+    linear-gradient(rgb(255 150 60 / .22), rgb(255 120 30 / .18));
+  mix-blend-mode: multiply;
+}
+
+/* Neon + ambient motion */
+.neon { filter: url(#glow); animation: flicker 6s infinite steps(1); }
+@keyframes flicker {
+  0%, 18%, 22%, 61%, 64%, 100% { opacity: 1; }
+  19%, 21%, 62% { opacity: .25; }
+  20%, 63% { opacity: .7; }
+}
+.bob { animation: bob 1s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+.bob.b2 { animation-duration: .5s; animation-delay: .1s; }
+.bob.b3 { animation-duration: 1s; animation-delay: .5s; }
+.bob.b4 { animation-duration: .5s; animation-delay: .25s; }
+@keyframes bob { to { transform: translateY(-6px) rotate(-1.5deg); } }
+.stir { animation: stir 1.6s ease-in-out infinite; transform-box: view-box; transform-origin: 905px 480px; }
+@keyframes stir { 0% { transform: rotate(0deg); } 25% { transform: rotate(-9deg) translateX(-6px); } 50% { transform: rotate(-2deg) translateX(-14px); } 75% { transform: rotate(6deg) translateX(-4px); } 100% { transform: rotate(0deg); } }
+.steam path { animation: steam 2.8s ease-in infinite; opacity: 0; transform-box: fill-box; }
+.steam path:nth-child(2) { animation-delay: .9s; }
+.steam path:nth-child(3) { animation-delay: 1.8s; }
+@keyframes steam { 0% { opacity: 0; transform: translateY(20px) scaleY(.7); } 30% { opacity: .75; } 100% { opacity: 0; transform: translateY(-50px) scaleY(1.1); } }
+.blink { animation: blink 4.5s infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes blink { 0%, 95%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
+.lamp-glow { animation: hum 3.2s ease-in-out infinite alternate; }
+@keyframes hum { to { opacity: .82; } }
+
+/* Clickable things in the scene */
+.hot { cursor: pointer; outline: none; }
+.hot:hover > .frame, .hot:focus-visible > .frame { stroke: var(--lamp); stroke-width: 7; }
+.hot:focus-visible { filter: drop-shadow(0 0 10px var(--lamp)); }
+
+/* Overlay UI */
+.hud {
+  position: fixed; z-index: 20; display: flex; gap: 8px; align-items: center;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  justify-content: space-between; pointer-events: none;
+}
+.hud > * { pointer-events: auto; }
+.pill {
+  font: 600 13px/1 var(--body); letter-spacing: .02em; color: var(--cream);
+  background: rgb(23 15 26 / .7); border: 2px solid var(--ink); border-radius: 999px;
+  padding: 9px 14px; cursor: pointer; backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 2px rgb(255 241 214 / .18);
+}
+.pill:hover { background: var(--lamp); color: var(--ink); }
+.pill:focus-visible, .opt:focus-visible, .close:focus-visible, .tabs button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
+.brand { font-family: var(--display); font-size: 20px; color: var(--cream); text-shadow: 0 2px 0 var(--ink); }
+
+.hint {
+  position: fixed; z-index: 15; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  transform: translateX(-50%); font: 22px/1.2 var(--hand); color: var(--cream);
+  text-align: center; text-shadow: 0 2px 0 var(--ink); transition: opacity .3s;
+}
+.hint span { display: block; animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateY(6px); } }
+
+.bubble {
+  position: fixed; z-index: 16; right: calc(50% + 150px); top: 22%;
+  width: min(400px, calc(100vw - 32px)); transform: scale(.9); transform-origin: 100% 60%;
+  background: var(--panel); color: var(--panel-ink); border: 4px solid var(--ink); border-radius: 26px;
+  padding: 18px 20px 20px; box-shadow: 6px 6px 0 var(--ink);
+  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s cubic-bezier(.3,1.6,.5,1);
+}
+.bubble.show { opacity: 1; pointer-events: auto; transform: scale(1); }
+.bubble::after {
+  content: ""; position: absolute; right: -30px; top: 46%; width: 34px; height: 30px;
+  background: var(--panel); border: 4px solid var(--ink); border-left: 0; border-bottom: 0;
+  transform: skewY(-25deg); border-top-right-radius: 10px;
+}
+.bubble p { font: 26px/1.15 var(--hand); margin: 0 0 12px; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  display: flex; align-items: center; gap: 10px; text-align: left; width: 100%;
+  font: 800 16px/1.2 var(--body); color: var(--panel-ink); background: #ffe2a8;
+  border: 3px solid var(--ink); border-radius: 14px; padding: 10px 12px; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink); transition: transform .12s, box-shadow .12s, background .12s;
+}
+.opt:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); background: var(--lamp); }
+.opt small { display: block; font: 600 13px/1.3 var(--body); color: #6b4a45; }
+.opt .e { font-size: 22px; }
+
+/* The menu card that slides in beside the scene */
+.panel {
+  position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: min(480px, 100vw);
+  background: var(--panel); color: var(--panel-ink); border-left: 4px solid var(--ink);
+  transform: translateX(105%); transition: transform .45s cubic-bezier(.2,.9,.2,1);
+  display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.panel.open { transform: none; }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding-block: 16px 10px; padding-left: 22px; padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 3px dashed #d9c3a5;
+}
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button {
+  font: 800 13px/1 var(--body); background: transparent; color: var(--panel-ink);
+  border: 2.5px solid var(--ink); border-radius: 999px; padding: 7px 11px; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--curtain); color: var(--cream); }
+.close {
+  font: 800 20px/1 var(--body); width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  border: 3px solid var(--ink); background: #ffe2a8; color: var(--panel-ink); cursor: pointer;
+}
+.panel-body { overflow-y: auto; padding-block: 18px 40px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.panel h2 { font: 400 34px/1 var(--display); margin: 0 0 6px; color: var(--curtain); text-wrap: balance; }
+.panel .kicker { font: 21px/1.2 var(--hand); color: #6b4a45; margin: 0 0 18px; }
+.panel h3 { font: 800 17px/1.3 var(--body); margin: 0; }
+.panel p { margin: 0; max-width: 62ch; }
+.panel a { color: var(--curtain); font-weight: 800; }
+.dish { display: grid; gap: 4px; padding-block: 14px; border-bottom: 2px dotted #d9c3a5; }
+.dish .row { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.dish .tag { font: 700 12px/1.2 var(--body); color: var(--curtain); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.dish p { color: #4c3436; font-size: 15px; }
+.stack { display: grid; gap: 14px; }
+.section-label { font: 800 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: #8a6a5e; margin-top: 22px !important; }
+
+/* Poster / diner focus card */
+.focus {
+  position: fixed; z-index: 40; inset: 0; display: grid; place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: rgb(10 6 12 / .55); opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.focus.show { opacity: 1; pointer-events: auto; }
+.focus-card {
+  width: min(420px, 100%); background: var(--panel); color: var(--panel-ink);
+  border: 4px solid var(--ink); border-radius: 22px; padding: 20px 22px 22px; box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(-1.5deg) scale(.92); transition: transform .25s cubic-bezier(.3,1.6,.5,1);
+  display: grid; gap: 10px; position: relative;
+}
+.focus.show .focus-card { transform: rotate(-1.5deg) scale(1); }
+.focus-card h2 { font: 400 28px/1.05 var(--display); margin: 0; color: var(--curtain); text-wrap: balance; }
+.focus-card p { margin: 0; }
+.focus-card .who { font: 20px/1.2 var(--hand); color: #6b4a45; }
+.focus-card .close { position: absolute; top: -16px; right: -12px; }
+.focus-card a { color: var(--curtain); font-weight: 800; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 700px) {
+  .panel { top: auto; height: 78svh; width: 100vw; border-left: 0; border-top: 4px solid var(--ink); border-radius: 24px 24px 0 0; transform: translateY(105%); }
+  .panel.open { transform: none; }
+  .bubble { right: auto; left: 50%; top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); transform: translateX(-50%) scale(.9); transform-origin: 50% 0; }
+  .bubble.show { transform: translateX(-50%) scale(1); }
+  .bubble::after { right: auto; left: 50%; top: -30px; transform: translateX(-50%) rotate(-90deg) skewY(-25deg); }
+  .bubble p { font-size: 23px; }
+  .brand { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .neon, .bob, .stir, .steam path, .blink, .lamp-glow, .hint span { animation: none !important; }
+  .steam path { opacity: .5; }
+}
+</style>
+
+<div class="hud">
+  <span class="brand">Shayan's</span>
+  <span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="pill" id="sound" type="button" aria-pressed="false">♪ Play the band</button>
+    <button class="pill" id="skip" type="button">Skip to my seat</button>
+  </span>
+</div>
+
+<p class="hint" id="hint"><span>Scroll to walk in</span>↓</p>
+
+<div class="bubble" id="bubble" role="dialog" aria-label="Shayan asks what you'd like">
+  <p>Hey, pull up a stool! What are you in the mood for?</p>
+  <div class="opts">
+    <button class="opt" type="button" data-open="about"><span class="e" aria-hidden="true">🧑‍🍳</span><span>A bit about me<small>Who's cooking, and how I got here</small></span></button>
+    <button class="opt" type="button" data-open="work"><span class="e" aria-hidden="true">🔥</span><span>A taste of my work<small>Things I've made at Segwise and before</small></span></button>
+    <button class="opt" type="button" data-open="likes"><span class="e" aria-hidden="true">📺</span><span>Things I'm into<small>Food, TV, teaching and writing</small></span></button>
+  </div>
+</div>
+
+<div class="scroller" id="scroller">
+  <div class="stage" id="stage" aria-label="An illustrated walk into Shayan's restaurant">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <defs>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="6" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="warm" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#ffd27a" stop-opacity=".95"/>
+          <stop offset=".45" stop-color="#ffb347" stop-opacity=".35"/>
+          <stop offset="1" stop-color="#ffb347" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="velvet" x1="0" x2="1">
+          <stop offset="0" stop-color="#8e1222"/><stop offset=".25" stop-color="#d42a39"/>
+          <stop offset=".5" stop-color="#9a1526"/><stop offset=".75" stop-color="#d42a39"/>
+          <stop offset="1" stop-color="#8e1222"/>
+        </linearGradient>
+        <pattern id="bricks" width="80" height="40" patternUnits="userSpaceOnUse">
+          <rect width="80" height="40" fill="#5b2a2a"/>
+          <path d="M0 0H80M0 20H80M0 40H80M20 0V20M60 20V40" stroke="#3f1b1d" stroke-width="4"/>
+        </pattern>
+        <pattern id="tiles" width="60" height="60" patternUnits="userSpaceOnUse">
+          <rect width="60" height="60" fill="#2c1f26"/><rect width="30" height="30" fill="#36262e"/><rect x="30" y="30" width="30" height="30" fill="#36262e"/>
+        </pattern>
+        <linearGradient id="spot" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#ffd27a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- ============ INSIDE (behind the street wall) ============ -->
+    <div class="layer interior" id="interior">
+
+      <!-- back wall with tall posters -->
+      <div class="layer" data-rate="0.35">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="false">
+          <rect width="1600" height="900" fill="#3a2630"/>
+          <rect y="560" width="1600" height="340" fill="#4a2c2a"/>
+          <path d="M0 560H1600" stroke="var(--ink)" stroke-width="6"/>
+          <g stroke="#3a2224" stroke-width="4">
+            <path d="M80 560V900M200 560V900M320 560V900M440 560V900M560 560V900M680 560V900M800 560V900M920 560V900M1040 560V900M1160 560V900M1280 560V900M1400 560V900M1520 560V900"/>
+          </g>
+
+          <!-- posters: each is a button -->
+          <g class="hot" data-poster="rule1" tabindex="0" role="button" aria-label="Poster: House rule number one" transform="rotate(-3 210 170)">
+            <rect class="frame" x="120" y="60" width="180" height="230" rx="6" fill="#fff1d6" stroke="var(--ink)" stroke-width="5"/>
+            <text x="210" y="100" text-anchor="middle" font-family="var(--body)" font-weight="800" font-size="16" fill="#c8202f">HOUSE RULE Nº1</text>
+            <text x="210" y="150" text-anchor="middle" font-family="var(--display)" font-size="30" fill="var(--ink)">TALK TO</text>
+            <text x="210" y="185" text-anchor="middle" font-family="var(--display)" font-size="30" fill="var(--ink)">CUSTOMERS</text>
+            <text x="210" y="235" text-anchor="middle" font-family="var(--display)" font-size="26" fill="#c8202f">EVERY. DAY.</text>
+            <circle cx="210" cy="268" r="6" fill="var(--ink)"/>
+          </g>
+
+          <g class="hot" data-poster="cook" tabindex="0" role="button" aria-label="Poster: Anyone can cook" transform="rotate(2 420 300)">
+            <rect class="frame" x="335" y="180" width="170" height="250" rx="6" fill="#2f6b5a" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M385 250c-22 0-28-34 0-36 4-18 32-22 40-6 14-14 40-4 36 16 24 4 18 36-4 30v22h-72z" fill="#fff1d6" stroke="var(--ink)" stroke-width="4"/>
+            <text x="420" y="340" text-anchor="middle" font-family="var(--display)" font-size="30" fill="#fff1d6">ANYONE</text>
+            <text x="420" y="375" text-anchor="middle" font-family="var(--display)" font-size="30" fill="#fff1d6">CAN COOK</text>
+            <text x="420" y="410" text-anchor="middle" font-family="var(--hand)" font-size="18" fill="#ffc857">— Gusteau</text>
+          </g>
+
+          <g class="hot" data-poster="fight" tabindex="0" role="button" aria-label="Poster: Gojek versus Grab, round two" transform="rotate(-2 640 130)">
+            <rect class="frame" x="550" y="20" width="185" height="250" rx="4" fill="#ffc857" stroke="var(--ink)" stroke-width="5"/>
+            <text x="642" y="62" text-anchor="middle" font-family="var(--body)" font-weight="800" font-size="15" fill="var(--ink)">TONIGHT ONLY</text>
+            <text x="642" y="112" text-anchor="middle" font-family="var(--display)" font-size="40" fill="#c8202f">GOJEK</text>
+            <text x="642" y="146" text-anchor="middle" font-family="var(--display)" font-size="22" fill="var(--ink)">vs</text>
+            <text x="642" y="190" text-anchor="middle" font-family="var(--display)" font-size="40" fill="#2f6b5a">GRAB</text>
+            <rect x="585" y="210" width="115" height="34" rx="4" fill="var(--ink)"/>
+            <text x="642" y="234" text-anchor="middle" font-family="var(--display)" font-size="20" fill="#ffc857">ROUND 2</text>
+          </g>
+
+          <g class="hot" data-poster="awesome" tabindex="0" role="button" aria-label="Neon sign: awesome">
+            <rect class="frame" x="770" y="70" width="300" height="120" rx="20" fill="#24161d" stroke="var(--ink)" stroke-width="5"/>
+            <text class="neon" x="920" y="150" text-anchor="middle" font-family="var(--display)" font-size="64" fill="none" stroke="#43d1c0" stroke-width="3">awesome</text>
+          </g>
+
+          <g class="hot" data-poster="tv" tabindex="0" role="button" aria-label="Poster: Now showing" transform="rotate(3 1180 330)">
+            <rect class="frame" x="1095" y="215" width="175" height="235" rx="6" fill="#3d6fd6" stroke="var(--ink)" stroke-width="5"/>
+            <text x="1182" y="255" text-anchor="middle" font-family="var(--body)" font-weight="800" font-size="15" fill="#fff1d6">NOW SHOWING</text>
+            <rect x="1125" y="272" width="115" height="85" rx="16" fill="#9ad7ff" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M1160 272l-20-26M1205 272l20-26" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M1150 300h20M1195 300h20M1160 330q22 14 44 0" stroke="var(--ink)" stroke-width="5" fill="none" stroke-linecap="round"/>
+            <text x="1182" y="395" text-anchor="middle" font-family="var(--display)" font-size="22" fill="#fff1d6">WAY TOO</text>
+            <text x="1182" y="425" text-anchor="middle" font-family="var(--display)" font-size="22" fill="#fff1d6">MUCH TV</text>
+          </g>
+
+          <g class="hot" data-poster="map" tabindex="0" role="button" aria-label="Poster: Bengaluru food map" transform="rotate(-2 1390 160)">
+            <rect class="frame" x="1300" y="40" width="190" height="240" rx="6" fill="#fff1d6" stroke="var(--ink)" stroke-width="5"/>
+            <text x="1395" y="75" text-anchor="middle" font-family="var(--display)" font-size="20" fill="#c8202f">NAMMA</text>
+            <text x="1395" y="100" text-anchor="middle" font-family="var(--display)" font-size="20" fill="#c8202f">FOOD MAP</text>
+            <path d="M1325 140q40-30 70 0t70 10M1330 200q50 20 90-10t50 30M1360 120v130M1440 115v140" stroke="#d9c3a5" stroke-width="6" fill="none"/>
+            <g fill="#c8202f" stroke="var(--ink)" stroke-width="3"><circle cx="1350" cy="150" r="9"/><circle cx="1420" cy="135" r="9"/><circle cx="1390" cy="215" r="9"/><circle cx="1455" cy="235" r="9"/></g>
+            <text x="1395" y="268" text-anchor="middle" font-family="var(--hand)" font-size="16" fill="var(--ink)">Hungry Mother Fakir</text>
+          </g>
+
+          <g class="hot" data-poster="subway" tabindex="0" role="button" aria-label="Poster: The long way round" transform="rotate(1.5 1460 420)">
+            <rect class="frame" x="1330" y="320" width="250" height="190" rx="6" fill="#fff1d6" stroke="var(--ink)" stroke-width="5"/>
+            <text x="1455" y="355" text-anchor="middle" font-family="var(--display)" font-size="20" fill="var(--ink)">THE LONG WAY ROUND</text>
+            <path d="M1355 450h40q20 0 30-20t30-20h40q20 0 30 20t30 20" stroke="#c8202f" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <g fill="#fff" stroke="var(--ink)" stroke-width="4"><circle cx="1360" cy="450" r="9"/><circle cx="1420" cy="438" r="9"/><circle cx="1475" cy="410" r="9"/><circle cx="1520" cy="430" r="9"/><circle cx="1555" cy="450" r="11" fill="#ffc857"/></g>
+            <text x="1360" y="485" text-anchor="middle" font-family="var(--body)" font-weight="800" font-size="12" fill="var(--ink)">EY</text>
+            <text x="1555" y="485" text-anchor="middle" font-family="var(--body)" font-weight="800" font-size="12" fill="var(--ink)">SEGWISE</text>
+          </g>
+
+          <g class="hot" data-poster="ship" tabindex="0" role="button" aria-label="Poster: Ship it" transform="rotate(-4 200 420)">
+            <rect class="frame" x="40" y="330" width="170" height="200" rx="6" fill="#ff7a3d" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M75 450h100l-18 30h-64z" fill="#fff1d6" stroke="var(--ink)" stroke-width="4"/>
+            <path d="M125 380v70M125 385l35 50h-35" fill="#fff1d6" stroke="var(--ink)" stroke-width="4"/>
+            <text x="125" y="370" text-anchor="middle" font-family="var(--display)" font-size="34" fill="var(--ink)">SHIP IT</text>
+            <text x="125" y="515" text-anchor="middle" font-family="var(--hand)" font-size="17" fill="var(--ink)">yes, PMs too</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- the band, back left: click for the playlist -->
+      <div class="layer" data-rate="0.55">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+          <g class="hot" data-poster="band" tabindex="0" role="button" aria-label="The house band: open Shayan's playlist">
+          <rect class="frame" x="40" y="380" width="500" height="340" rx="20" fill="transparent" stroke="transparent" stroke-width="0"/>
+          <path d="M170 0L60 640H520L380 0z" fill="url(#spot)"/>
+          <rect x="40" y="620" width="500" height="40" rx="6" fill="#5b2f24" stroke="var(--ink)" stroke-width="5"/>
+          <!-- piano -->
+          <g class="bob"><path d="M70 520h150v100H70z" fill="#1d1018"/><circle cx="120" cy="470" r="26" fill="#2a1a22" stroke="#ffb347" stroke-width="2"/><path d="M95 500h50l10 60H85z" fill="#2a1a22"/></g>
+          <!-- double bass -->
+          <g class="bob b2"><circle cx="260" cy="440" r="24" fill="#2a1a22" stroke="#ffb347" stroke-width="2"/><path d="M240 466h40l8 154h-56z" fill="#2a1a22"/><path d="M300 400v120M285 520c-30 0-35 40-15 55-20 15-10 50 30 50s50-35 30-50c20-15 15-55-15-55z" fill="#6a3a22" stroke="#1d1018" stroke-width="4"/></g>
+          <!-- sax -->
+          <g class="bob b3"><circle cx="375" cy="430" r="25" fill="#2a1a22" stroke="#ffb347" stroke-width="2"/><path d="M352 458h46l8 162h-62z" fill="#2a1a22"/><path d="M395 470q30 10 25 70q-5 30-35 25" stroke="#ffc857" stroke-width="10" fill="none" stroke-linecap="round"/></g>
+          <!-- drums -->
+          <g class="bob b4"><circle cx="480" cy="460" r="24" fill="#2a1a22" stroke="#ffb347" stroke-width="2"/><path d="M458 486h44l6 80h-56z" fill="#2a1a22"/><ellipse cx="485" cy="585" rx="42" ry="30" fill="#c8202f" stroke="#1d1018" stroke-width="4"/><path d="M430 530h40" stroke="#ffc857" stroke-width="6"/></g>
+          <text x="290" y="700" text-anchor="middle" font-family="var(--hand)" font-size="24" fill="#ffc857">♫ tonight's playlist</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- pendant lamps -->
+      <div class="layer" data-rate="0.8">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g>
+            <circle class="lamp-glow" cx="560" cy="250" r="260" fill="url(#warm)"/>
+            <circle class="lamp-glow" cx="1040" cy="250" r="260" fill="url(#warm)" style="animation-delay:1.1s"/>
+          </g>
+          <g stroke="var(--ink)" stroke-width="5">
+            <path d="M560 0v180M1040 0v180"/>
+            <path d="M515 232q45-90 90 0z" fill="#ffd98a"/>
+            <path d="M995 232q45-90 90 0z" fill="#ffd98a"/>
+            <path d="M548 152h24M1028 152h24" stroke-width="8"/>
+          </g>
+          <ellipse cx="560" cy="234" rx="30" ry="9" fill="#ffe7a8"/>
+          <ellipse cx="1040" cy="234" rx="30" ry="9" fill="#ffe7a8"/>
+        </svg>
+      </div>
+
+      <!-- the counter, the kitchen and me -->
+      <div class="layer" data-rate="1.0">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <!-- kitchen hatch behind me -->
+          <rect x="560" y="300" width="480" height="320" rx="10" fill="#22161c" stroke="var(--ink)" stroke-width="6"/>
+          <path d="M590 360h420" stroke="#5b2f24" stroke-width="10"/>
+          <g stroke="var(--ink)" stroke-width="4">
+            <path d="M612 360v-30q0-8 6-12v-14h8v14q6 4 6 12v30z" fill="#7a2b2b"/>
+            <path d="M640 360v-34q0-8 6-12v-12h8v12q6 4 6 12v34z" fill="#3f6a3a"/>
+            <path d="M668 360v-28q0-8 6-12v-10h8v10q6 4 6 12v28z" fill="#c9a24a"/>
+            <path d="M922 360v-32q0-8 6-12v-12h8v12q6 4 6 12v32z" fill="#5a2c4a"/>
+            <path d="M950 360v-26q0-8 6-12v-10h8v10q6 4 6 12v26z" fill="#7a2b2b"/>
+            <path d="M978 360v-30q0-8 6-12v-12h8v12q6 4 6 12v30z" fill="#c9a24a"/>
+          </g>
+
+          <!-- ME, drawn from Shayan's photos: backwards red cap, big grin, mustard apron -->
+          <g id="chef">
+            <!-- body + white tee -->
+            <path d="M684 640c0-112 44-164 116-164s116 52 116 164z" fill="#f4ede4" stroke="var(--ink)" stroke-width="6"/>
+            <!-- mustard apron, like the puffer -->
+            <path d="M742 516h116l22 124H720z" fill="#e2a72e" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M752 518l18-42M848 518l-18-42" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/>
+            <rect x="766" y="556" width="68" height="34" rx="6" fill="#c98e1f" stroke="var(--ink)" stroke-width="4"/>
+            <text x="800" y="579" text-anchor="middle" font-family="var(--hand)" font-size="17" fill="var(--ink)">yes, chef</text>
+            <!-- neck + ears -->
+            <path d="M780 436h40v46h-40z" fill="#a8704c" stroke="var(--ink)" stroke-width="6"/>
+            <ellipse cx="718" cy="388" rx="15" ry="22" fill="#a8704c" stroke="var(--ink)" stroke-width="6"/>
+            <ellipse cx="882" cy="388" rx="15" ry="22" fill="#a8704c" stroke="var(--ink)" stroke-width="6"/>
+            <!-- face: a touch long, rounded chin -->
+            <path d="M722 372c0-58 34-86 78-86s78 28 78 86c0 58-34 92-78 92s-78-34-78-92z" fill="#b57a52" stroke="var(--ink)" stroke-width="6"/>
+            <!-- short black hair at the sides, under the cap -->
+            <path d="M724 368q2-26 14-38v44zM876 368q-2-26-14-38v44z" fill="#1d1018"/>
+            <!-- backwards red cap: dome, the visor poking out behind, snapback strap over the forehead -->
+            <path d="M846 300q66-18 80 14q-34 8-70 2z" fill="#9c1730" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M718 350c0-52 34-80 82-80s82 28 82 80z" fill="#c42141" stroke="var(--ink)" stroke-width="6"/>
+            <path d="M768 350q32-30 64 0" fill="#b57a52" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M774 343h52" stroke="#1d1018" stroke-width="5"/>
+            <path d="M800 270v8" stroke="var(--ink)" stroke-width="8" stroke-linecap="round"/>
+            <!-- thick brows, eyes squeezed shut mid-laugh -->
+            <path d="M748 364q16-9 32 0M820 364q16-9 32 0" stroke="#1d1018" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <g class="blink"><path d="M752 388q12-12 24 0M824 388q12-12 24 0" stroke="var(--ink)" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+            <!-- nose -->
+            <path d="M800 384q-4 22-12 28q8 6 18 2" stroke="var(--ink)" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- the grin -->
+            <path d="M762 420q38 44 76 0z" fill="#6b1f24" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+            <path d="M768 422h64q-4 10-32 12q-28-2-32-12z" fill="#fff"/>
+            <path d="M744 416q4 10 12 12M856 416q-4 10-12 12" stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <!-- a bit of stubble -->
+            <g fill="#7a4e33" opacity=".55"><circle cx="776" cy="452" r="2"/><circle cx="790" cy="458" r="2"/><circle cx="808" cy="458" r="2"/><circle cx="824" cy="452" r="2"/><circle cx="800" cy="462" r="2"/></g>
+            <!-- left arm holds the pot handle -->
+            <path d="M700 560q-20 40 10 70" stroke="var(--ink)" stroke-width="30" fill="none" stroke-linecap="round"/>
+            <path d="M700 560q-20 40 10 70" stroke="#b57a52" stroke-width="18" fill="none" stroke-linecap="round"/>
+            <!-- right arm stirs -->
+            <g class="stir">
+              <path d="M900 560q30 40 0 75" stroke="var(--ink)" stroke-width="30" fill="none" stroke-linecap="round"/>
+              <path d="M900 560q30 40 0 75" stroke="#b57a52" stroke-width="18" fill="none" stroke-linecap="round"/>
+              <path d="M895 640l-40-90" stroke="#8a5a3a" stroke-width="10" stroke-linecap="round"/>
+              <path d="M895 640l-40-90" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" opacity=".5"/>
+            </g>
+          </g>
+
+          <!-- counter top, seen from a stool -->
+          <path d="M0 640H1600V900H0z" fill="#e3a46a"/>
+          <path d="M0 640H1600" stroke="var(--ink)" stroke-width="8"/>
+          <path d="M0 650H1600" stroke="#fff0c8" stroke-width="10"/>
+          <path d="M0 700H1600V900H0z" fill="#c9824c" opacity=".35"/>
+          <g stroke="#7f4728" stroke-width="3" opacity=".7"><path d="M120 720q300-20 560 0M900 760q260-25 600 0M200 830q400-20 700 0"/></g>
+
+          <!-- the pot -->
+          <g>
+            <path d="M720 590h170l-10 70q-75 18-150 0z" fill="#3b4c63" stroke="var(--ink)" stroke-width="6" stroke-linejoin="round"/>
+            <ellipse cx="805" cy="590" rx="86" ry="18" fill="#2a3446" stroke="var(--ink)" stroke-width="6"/>
+            <ellipse cx="805" cy="592" rx="70" ry="10" fill="#e8a33a"/>
+            <path d="M720 605h-26M890 605h26" stroke="var(--ink)" stroke-width="10" stroke-linecap="round"/>
+            <g class="steam" fill="none" stroke="#fff1d6" stroke-width="7" stroke-linecap="round">
+              <path d="M770 560q-14-24 0-44t0-44"/>
+              <path d="M808 560q14-24 0-44t0-44"/>
+              <path d="M845 560q-14-24 0-44t0-44"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+
+      <!-- foreground: the two people already at the counter, and your place -->
+      <div class="layer" data-rate="1.35">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="false">
+          <!-- your place setting -->
+          <g aria-hidden="true">
+            <ellipse cx="800" cy="840" rx="150" ry="40" fill="#fff1d6" stroke="var(--ink)" stroke-width="6"/>
+            <ellipse cx="800" cy="840" rx="95" ry="22" fill="none" stroke="#d9c3a5" stroke-width="5"/>
+            <path d="M610 810v80M600 810v25q10 10 20 0v-25M990 805q14 30 0 85" stroke="var(--ink)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M1060 760h50l-6 110h-38z" fill="rgb(180 220 255 / .35)" stroke="var(--ink)" stroke-width="5"/>
+          </g>
+          <!-- diner on the left -->
+          <g class="hot" data-diner="sean" tabindex="0" role="button" aria-label="The diner on the left: read what they said">
+            <path class="frame" d="M150 900c0-170 50-240 140-240s140 70 140 240z" fill="#3d6fd6" stroke="var(--ink)" stroke-width="6"/>
+            <circle class="frame" cx="290" cy="600" r="72" fill="#7a4a2e" stroke="var(--ink)" stroke-width="6"/>
+            <path d="M222 590q10-70 70-74 62 4 70 74-30-24-70-22-40-2-70 22z" fill="#2a1a12" stroke="var(--ink)" stroke-width="5"/>
+            <text x="290" y="505" text-anchor="middle" font-family="var(--hand)" font-size="26" fill="#ffc857">“…”</text>
+          </g>
+          <!-- diner on the right -->
+          <g class="hot" data-diner="simar" tabindex="0" role="button" aria-label="The diner on the right: read what they said">
+            <path class="frame" d="M1170 900c0-170 50-240 140-240s140 70 140 240z" fill="#2f6b5a" stroke="var(--ink)" stroke-width="6"/>
+            <circle class="frame" cx="1310" cy="600" r="72" fill="#c4865f" stroke="var(--ink)" stroke-width="6"/>
+            <path d="M1240 585q8-80 70-82 66 2 72 82q-18-40-72-40t-70 40z" fill="#c8202f" stroke="var(--ink)" stroke-width="5"/>
+            <circle cx="1310" cy="508" r="16" fill="#c8202f" stroke="var(--ink)" stroke-width="5"/>
+            <text x="1310" y="475" text-anchor="middle" font-family="var(--hand)" font-size="26" fill="#ffc857">“…”</text>
+          </g>
+        </svg>
+      </div>
+      <!-- one amber light over everything, darkness at the edges (from the moodboard) -->
+      <div class="layer amber" aria-hidden="true"></div>
+    </div>
+
+    <!-- ============ OUTSIDE ============ -->
+    <div class="layer" id="outside">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <!-- the wall, with the doorway cut out so the room shows through -->
+        <path fill-rule="evenodd" fill="url(#bricks)" d="M0 0H1600V900H0z M650 760V380a150 150 0 0 1 300 0V760z"/>
+        <path d="M650 760V380a150 150 0 0 1 300 0V760" fill="none" stroke="var(--ink)" stroke-width="14"/>
+        <path d="M632 770V380a168 168 0 0 1 336 0V770" fill="none" stroke="#7a3b2a" stroke-width="18"/>
+        <!-- windows glowing on either side -->
+        <g>
+          <rect x="250" y="360" width="250" height="230" rx="10" fill="#ffb347" stroke="var(--ink)" stroke-width="10"/>
+          <rect x="1100" y="360" width="250" height="230" rx="10" fill="#ffb347" stroke="var(--ink)" stroke-width="10"/>
+          <circle cx="375" cy="475" r="140" fill="url(#warm)"/><circle cx="1225" cy="475" r="140" fill="url(#warm)"/>
+          <path d="M375 360v230M250 475h250M1225 360v230M1100 475h250" stroke="var(--ink)" stroke-width="8"/>
+          <g fill="#5a2c2a"><circle cx="320" cy="540" r="26"/><path d="M290 590q0-40 30-40t30 40z"/><circle cx="1270" cy="530" r="24"/><path d="M1240 590q0-40 30-40t30 40z"/></g>
+        </g>
+        <!-- neon OPEN -->
+        <rect x="660" y="120" width="280" height="110" rx="18" fill="#1d1018" stroke="var(--ink)" stroke-width="6"/>
+        <path d="M700 120V70M900 120V70" stroke="var(--ink)" stroke-width="5"/>
+        <text class="neon" x="800" y="200" text-anchor="middle" font-family="var(--neon-font)" font-size="70" fill="var(--neon)">OPEN</text>
+        <!-- sign board -->
+        <g transform="rotate(-2 380 220)">
+          <rect x="250" y="175" width="260" height="90" rx="12" fill="#2f6b5a" stroke="var(--ink)" stroke-width="7"/>
+          <text x="380" y="235" text-anchor="middle" font-family="var(--display)" font-size="44" fill="#fff1d6">Shayan's</text>
+        </g>
+        <!-- pavement + chalkboard -->
+        <rect y="760" width="1600" height="140" fill="#2a1d22"/>
+        <path d="M0 760H1600" stroke="var(--ink)" stroke-width="8"/>
+        <g transform="rotate(3 1240 760)">
+          <path d="M1150 860l40-170h120l40 170" fill="none" stroke="#7a3b2a" stroke-width="12" stroke-linecap="round"/>
+          <rect x="1175" y="690" width="150" height="130" rx="6" fill="#1f2a24" stroke="var(--ink)" stroke-width="7"/>
+          <text x="1250" y="725" text-anchor="middle" font-family="var(--hand)" font-size="22" fill="#fff1d6">TONIGHT</text>
+          <text x="1250" y="757" text-anchor="middle" font-family="var(--hand)" font-size="18" fill="#fff1d6">whatever I feel</text>
+          <text x="1250" y="782" text-anchor="middle" font-family="var(--hand)" font-size="18" fill="#fff1d6">like cooking</text>
+          <text x="1250" y="808" text-anchor="middle" font-family="var(--hand)" font-size="18" fill="#ffc857">♥</text>
+        </g>
+        <!-- potted plant -->
+        <g><path d="M380 860l-14-80h108l-14 80z" fill="#c8602f" stroke="var(--ink)" stroke-width="7"/>
+          <path d="M420 780q-60-60-30-130M420 780q10-90 50-120M420 780q50-40 90-30" stroke="#3f8a5a" stroke-width="16" fill="none" stroke-linecap="round"/></g>
+      </svg>
+    </div>
+
+    <!-- the curtain sits in the doorway, part of the outside -->
+    <div class="layer" id="curtains">
+      <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs><clipPath id="door"><path d="M650 760V380a150 150 0 0 1 300 0V760z"/></clipPath></defs>
+        <g clip-path="url(#door)">
+          <g id="curtL"><path d="M640 220H812V760H640z" fill="url(#velvet)" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M680 240V760M720 240V760M760 240V760" stroke="#7a0f1d" stroke-width="5"/></g>
+          <g id="curtR"><path d="M788 220H960V760H788z" fill="url(#velvet)" stroke="var(--ink)" stroke-width="5"/>
+            <path d="M840 240V760M880 240V760M920 240V760" stroke="#7a0f1d" stroke-width="5"/></g>
+          <rect x="640" y="228" width="320" height="34" fill="#ffc857" stroke="var(--ink)" stroke-width="5"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<aside class="panel" id="panel" aria-labelledby="panel-title" aria-hidden="true">
+  <div class="panel-head">
+    <div class="tabs" role="tablist" aria-label="Menu">
+      <button role="tab" type="button" data-tab="about" aria-selected="false">About me</button>
+      <button role="tab" type="button" data-tab="work" aria-selected="false">My work</button>
+      <button role="tab" type="button" data-tab="likes" aria-selected="false">Things I'm into</button>
+    </div>
+    <button class="close" type="button" id="panelClose" aria-label="Close the menu">×</button>
+  </div>
+  <div class="panel-body" id="panelBody" tabindex="-1"></div>
+</aside>
+
+<div class="focus" id="focus" role="dialog" aria-modal="true" aria-labelledby="focusTitle">
+  <div class="focus-card">
+    <button class="close" type="button" id="focusClose" aria-label="Close">×</button>
+    <h2 id="focusTitle"></h2>
+    <p id="focusText"></p>
+    <p class="who" id="focusWho"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t) => t * t * (3 - 2 * t);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- content ---------------- */
+  const panels = {
+    about: {
+      title: 'Who’s cooking',
+      kicker: 'Raised on Cartoon Network, fed by Bengaluru, and now making things of my own.',
+      html: `
+        <div class="stack">
+          <p>I've spent most of my life consuming things, from cartoons and films to food and other people's products, and somewhere along the way it all turned into taste. Now I get to put that to work, leading Product and Customer Success at Segwise.ai, shipping features myself with AI agents, and running food walks around the city.</p>
+          <p class="section-label">The long way round</p>
+          <div class="dish"><div class="row"><h3>EY</h3><span class="tag">2020–22</span></div><p>I started out checking the tech systems behind big brands, and kept spending my evenings building tools to make it faster, which probably said something.</p></div>
+          <div class="dish"><div class="row"><h3>Orinko</h3><span class="tag">2020</span></div><p>Two months helping a hydroponics startup sell through people instead of shelves. That's where I realised product management was the job I wanted.</p></div>
+          <div class="dish"><div class="row"><h3>The Product Folks</h3><span class="tag">2020–23</span></div><p>Found my people, helped run Insurjo, hosted OfficeHours and asked a lot of experienced PMs a lot of questions.</p></div>
+          <div class="dish"><div class="row"><h3>FamPay</h3><span class="tag">2022–23</span></div><p>Halfway through Master's applications when Brijesh called about an APM role. I said yes and spent a year on growth for an app built for teenagers.</p></div>
+          <div class="dish"><div class="row"><h3>Segwise</h3><span class="tag">2023–now</span></div><p>Followed Brijesh again, as one of the first people through the door, and I've been building there ever since.</p></div>
+        </div>`,
+    },
+    work: {
+      title: 'Things I’ve made',
+      kicker: 'Talk to a customer, spot what’s missing, build whatever fills the gap. Repeat.',
+      html: `
+        <p class="section-label" style="margin-top:0!important">At Segwise</p>
+        <div class="dish"><div class="row"><h3>A playable-ad business</h3><span class="tag">Zero to one</span></div><p>Customers kept asking for playable ads, so I started a line of them and set up a kitchen where AI agents do most of the cooking and I do the tasting.</p></div>
+        <div class="dish"><div class="row"><h3>A better first week</h3><span class="tag">Growth</span></div><p>Rebuilt the trial so new customers get a real result while they're still signing up.</p></div>
+        <div class="dish"><div class="row"><h3>A chat agent for ad data</h3><span class="tag">Product</span></div><p>People wanted to ask a question and get an answer, not set up another dashboard. We shipped it in under a week.</p></div>
+        <div class="dish"><div class="row"><h3>Tools that let marketers help themselves</h3><span class="tag">Building</span></div><p>A chat for making AI tags without waiting on an engineer, and a check that scores new ads before any money goes on them.</p></div>
+        <p class="section-label">Before that</p>
+        <div class="dish"><div class="row"><h3>Growth for a teen payments app</h3><span class="tag">FamPay</span></div><p>Onboarding, referrals, a subscription and custom UPI IDs, which were surprisingly fun to sell to sixteen-year-olds.</p></div>
+        <div class="dish"><div class="row"><h3>EY Infinity</h3><span class="tag">EY</span></div><p>Python tools that took hours of Oracle and SAP grunt work off auditors' plates.</p></div>
+        <div class="dish"><div class="row"><h3>A social commerce channel</h3><span class="tag">Orinko</span></div><p>No e-commerce experience, two months, and it beat the old model in its first month.</p></div>`,
+    },
+    likes: {
+      title: 'Off the clock',
+      kicker: 'Cartoon Network and Disney more or less raised me.',
+      html: `
+        <div class="dish"><div class="row"><h3>Hungry Mother Fakir</h3><span class="tag">Food</span></div><p>My food page: restaurant reviews, food walks and hosted meals around Bengaluru.</p></div>
+        <div class="dish"><div class="row"><h3>Pop-ups and the supper club</h3><span class="tag">Food</span></div><p>Placeholder: a line on your favourite pop-up goes here.</p></div>
+        <div class="dish"><div class="row"><h3>A ridiculous amount of TV</h3><span class="tag">Watching</span></div><p>Placeholder: what's on rotation right now.</p></div>
+        <div class="dish"><div class="row"><h3>Samiksha Foundation</h3><span class="tag">Teaching</span></div><p>Teaching kids from kindergarten to Grade 6 so they can keep up with school during cancer treatment.</p></div>
+        <p class="section-label">With your coffee</p>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/overachieving-underappreciated-the-stripe-story-74fa8b1d256b" target="_blank" rel="noopener">The Stripe story ↗</a></h3><span class="tag">2021</span></div></div>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/ask-app-not-to-track-is-apple-on-our-side-6953cb0464a0" target="_blank" rel="noopener">Is Apple on our side? ↗</a></h3><span class="tag">2021</span></div></div>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/gojek-vs-grab-round-2-a2ee9eed4bf4" target="_blank" rel="noopener">Gojek vs Grab: Round 2 ↗</a></h3><span class="tag">2021</span></div></div>
+        <p class="section-label">Say hello</p>
+        <p>mohamedshayan5@gmail.com · <a href="https://www.linkedin.com/in/mohamed-shayan-22071998/" target="_blank" rel="noopener">LinkedIn ↗</a> · <a href="https://github.com/s5hayan" target="_blank" rel="noopener">GitHub ↗</a></p>`,
+    },
+  };
+  const posters = {
+    rule1: ['House rule Nº1', 'Talk to your customers every day. Even when they can’t put the problem into words, they’ll still show you what to build next.'],
+    cook: ['Anyone can cook', 'Gusteau was right. It just took me a while to believe him, and a few years of eating everyone else’s cooking first.'],
+    fight: ['Gojek vs Grab: Round 2', 'One of my 2021 essays, on two super-apps slugging it out across Southeast Asia.', 'https://mohamedshayan5.medium.com/gojek-vs-grab-round-2-a2ee9eed4bf4'],
+    awesome: ['awesome', 'My favourite word. You’ll hear it a lot in here.'],
+    tv: ['Now showing', 'Way too much TV. Placeholder: tell me what’s on rotation and it goes up here.'],
+    map: ['Namma food map', 'Hungry Mother Fakir, my food page: restaurant reviews, food walks and hosted meals around Bengaluru.'],
+    subway: ['The long way round', 'EY → Orinko → The Product Folks → FamPay → Segwise. Ask me for “a bit about me” for the full ride.'],
+    band: ['The house band', 'They’re playing my playlist tonight. The band button up top plays a stand-in tune; the real thing lives on Spotify.', 'https://open.spotify.com/playlist/6rlOT0zsfrYRCkmmjLycSI'],
+    ship: ['Ship it', 'Every PM should be shipping now. Coding agents took away the last good excuse, and getting over the fear of breaking things was the hardest part.'],
+  };
+  const diners = {
+    sean: ['“Never far from something very successful”', 'He’s one of these guys that is never going to be far away from something very successful, and will put in the hard yards to make it work.', 'Sean Chapman, growth consultant and Segwise customer'],
+    simar: ['“Deep product intuition”', 'He has deep product intuition and was great in anticipating our needs and implementing feedback fast.', 'Simardeep Singh, performance marketing manager and Segwise customer'],
+  };
+
+  /* ---------------- camera ---------------- */
+  const outside = $('#outside'), curtains = $('#curtains'), interior = $('#interior');
+  const curtL = $('#curtL'), curtR = $('#curtR');
+  const layers = [...interior.querySelectorAll('.layer')].map((el) => ({ el, rate: +el.dataset.rate }));
+  const hint = $('#hint'), bubble = $('#bubble');
+  let target = 0, shown = 0, seated = false;
+
+  const progress = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    return max > 0 ? clamp(scrollY / max) : 0;
+  };
+
+  function render(p) {
+    // walking up to the door and through the curtain
+    const approach = ease(clamp(p / 0.42));
+    const outScale = 1 + 5.5 * approach * approach;
+    const outOpacity = 1 - clamp((p - 0.33) / 0.07);
+    outside.style.transform = curtains.style.transform = `scale(${outScale})`;
+    outside.style.opacity = curtains.style.opacity = outOpacity;
+    const part = ease(clamp((p - 0.1) / 0.22));
+    curtL.style.transform = `translateX(${-150 * part}px) scaleX(${1 - 0.35 * part})`;
+    curtR.style.transform = `translateX(${150 * part}px) scaleX(${1 - 0.35 * part})`;
+    curtL.style.transformOrigin = '640px 0'; curtR.style.transformOrigin = '960px 0';
+
+    // inside: the room grows as you walk to the counter; nearer layers move faster
+    const walk = ease(clamp((p - 0.28) / 0.62));
+    interior.style.transform = `scale(${0.5 + 0.5 * ease(clamp(p / 0.4))})`;
+    interior.style.filter = `brightness(${0.55 + 0.45 * ease(clamp((p - 0.2) / 0.3))})`;
+    for (const { el, rate } of layers) {
+      el.style.transform = `scale(${1 + rate * 0.32 * walk}) translateY(${-rate * 30 * walk}px)`;
+    }
+
+    hint.style.opacity = p < 0.06 ? 1 : 0;
+    const nowSeated = p > 0.93;
+    if (nowSeated !== seated) {
+      seated = nowSeated;
+      bubble.classList.toggle('show', seated && !panel.classList.contains('open'));
+    }
+    band.setMix(clamp((p - 0.15) / 0.3));
+  }
+
+  function tick() {
+    target = progress();
+    shown += (target - shown) * (reduce ? 1 : 0.12);
+    if (Math.abs(target - shown) < 0.0005) shown = target;
+    render(shown);
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- placeholder jazz, made in the browser ---------------- */
+  const band = (() => {
+    let ctx, master, filter, playing = false, nextTime = 0, step = 0, timer, mix = 0;
+    const bpm = 118, beat = 60 / bpm;
+    // ii–V–I–VI in C: Dm7, G7, Cmaj7, A7 (MIDI notes)
+    const chords = [[50, 53, 57, 60], [43, 47, 50, 53], [48, 52, 55, 59], [45, 49, 52, 55]];
+    const walks = [[38, 41, 45, 48], [43, 47, 50, 49], [36, 40, 43, 45], [33, 37, 40, 37]];
+    const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function voice(type, f, t, dur, vol, dest) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(dest); o.start(t); o.stop(t + dur + 0.05);
+    }
+    function ride(t, vol) {
+      const len = 0.25, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+      const s = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = buf; hp.type = 'highpass'; hp.frequency.value = 6500; g.gain.value = vol;
+      s.connect(hp).connect(g).connect(filter); s.start(t);
+    }
+    function schedule() {
+      while (nextTime < ctx.currentTime + 0.15) {
+        const bar = Math.floor(step / 4) % 4, b = step % 4;
+        voice('triangle', hz(walks[bar][b]), nextTime, beat * 0.9, 0.32, filter);              // walking bass
+        ride(nextTime, 0.18); ride(nextTime + beat * 0.66, b % 2 ? 0.12 : 0.06);                  // swung ride
+        if (b === 1 || b === 3 || (b === 2 && Math.random() < 0.4)) {                            // piano comps on the off-beats
+          const t = nextTime + beat * (b === 2 ? 0.66 : 0);
+          chords[bar].forEach((n) => voice('sine', hz(n + 12), t, beat * 0.55, 0.045, filter));
+        }
+        nextTime += beat; step++;
+      }
+    }
+    function start() {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        filter = ctx.createBiquadFilter(); filter.type = 'lowpass';
+        master = ctx.createGain(); master.gain.value = 0;
+        filter.connect(master).connect(ctx.destination);
+      }
+      ctx.resume(); nextTime = ctx.currentTime + 0.05; playing = true;
+      timer = setInterval(schedule, 25); apply();
+    }
+    function stop() { playing = false; clearInterval(timer); if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.1); }
+    function apply() {
+      if (!ctx || !playing) return;
+      // outside it's muffled through the wall; inside it opens up
+      filter.frequency.setTargetAtTime(450 + 9000 * mix * mix, ctx.currentTime, 0.1);
+      master.gain.setTargetAtTime(0.35 + 0.45 * mix, ctx.currentTime, 0.1);
+    }
+    return {
+      toggle() { playing ? stop() : start(); return playing; },
+      setMix(m) { if (Math.abs(m - mix) > 0.01) { mix = m; apply(); } },
+    };
+  })();
+
+  const sound = $('#sound');
+  sound.addEventListener('click', () => {
+    const on = band.toggle();
+    sound.setAttribute('aria-pressed', String(on));
+    sound.textContent = on ? '♪ Band’s playing' : '♪ Play the band';
+  });
+
+  /* ---------------- menu panel ---------------- */
+  const panel = $('#panel'), body = $('#panelBody');
+  function openPanel(key) {
+    const c = panels[key];
+    body.innerHTML = `<h2 id="panel-title">${c.title}</h2><p class="kicker">${c.kicker}</p>${c.html}`;
+    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === key)));
+    panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false');
+    bubble.classList.remove('show'); body.scrollTop = 0; body.focus({ preventScroll: true });
+  }
+  function closePanel() {
+    panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
+    if (seated) bubble.classList.add('show');
+  }
+  document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.open)));
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.tab)));
+  $('#panelClose').addEventListener('click', closePanel);
+
+  /* ---------------- posters and diners ---------------- */
+  const focus = $('#focus');
+  function showFocus([title, text, extra]) {
+    $('#focusTitle').textContent = title;
+    $('#focusText').textContent = text;
+    const who = $('#focusWho');
+    who.replaceChildren();
+    if (extra && extra.startsWith('http')) {
+      const a = document.createElement('a'); a.href = extra; a.target = '_blank'; a.rel = 'noopener'; a.textContent = extra.includes('spotify') ? 'Open the playlist on Spotify ↗' : 'Read it ↗';
+      who.append(a);
+    } else if (extra) who.textContent = extra;
+    focus.classList.add('show'); $('#focusClose').focus();
+  }
+  const hideFocus = () => focus.classList.remove('show');
+  document.querySelectorAll('[data-poster], [data-diner]').forEach((el) => {
+    const open = () => showFocus(el.dataset.poster ? posters[el.dataset.poster] : diners[el.dataset.diner]);
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  });
+  $('#focusClose').addEventListener('click', hideFocus);
+  focus.addEventListener('click', (e) => { if (e.target === focus) hideFocus(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') { hideFocus(); closePanel(); } });
+
+  $('#skip').addEventListener('click', () => scrollTo({ top: document.documentElement.scrollHeight, behavior: reduce ? 'auto' : 'smooth' }));
+
+  render(progress());
+  requestAnimationFrame(tick);
+})();
+</script>
