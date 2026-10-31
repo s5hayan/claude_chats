@@ -9,11 +9,16 @@ export interface MadeItem {
   description: string;
   /** Case study or external link, if there is one */
   href?: string;
+  /** Shown big on the plate that follows the cursor */
+  emoji: string;
+  /** Optional GIF for the plate instead of the emoji */
+  gif?: { src: string; alt: string };
 }
 
 export const madeAtSegwise: MadeItem[] = [
   {
     name: 'A playable-ad business',
+    emoji: '🎮', gif: { src: 'https://media.tenor.com/9pBd7TjW7rwAAAAM/let-him-cook-cook.gif', alt: 'A chef cooking over big flames' },
     tag: 'Zero to one',
     description:
       "Customers kept asking whether we could make playable ads too, so I started a line of them inside Segwise and set up a production kitchen where AI agents do most of the cooking and I do the tasting.",
@@ -21,6 +26,7 @@ export const madeAtSegwise: MadeItem[] = [
   },
   {
     name: 'A better first week',
+    emoji: '🌱',
     tag: 'Growth',
     description:
       'Too many new customers were leaving before they saw anything useful, so I rebuilt the trial around getting them a real result while they were still signing up.',
@@ -28,6 +34,7 @@ export const madeAtSegwise: MadeItem[] = [
   },
   {
     name: 'A chat agent for ad data',
+    emoji: '💬',
     tag: 'Product',
     description:
       "People on calls didn't want another dashboard to set up. They wanted to ask a question and get an answer, so I made the case for an agent and we shipped it in under a week.",
@@ -35,12 +42,14 @@ export const madeAtSegwise: MadeItem[] = [
   },
   {
     name: 'Tools that let marketers help themselves',
+    emoji: '🏷️', gif: { src: 'https://media.tenor.com/0prCeJ87QBYAAAAM/waiting-dexter.gif', alt: "Dexter from Dexter's Laboratory drumming his fingers, waiting" },
     tag: 'Building',
     description:
       "A chat that lets marketers create their own AI tags without waiting on an engineer, and a check that scores new ads against a brand's past winners before any money goes on them.",
   },
   {
     name: 'A support bot that keeps learning',
+    emoji: '🤖',
     tag: 'Customer success',
     description:
       'A weekly look at where our support bot gets stuck, plus a sync that drafts help-centre updates whenever the product changes, so the answers never drift too far from the truth.',
@@ -50,24 +59,28 @@ export const madeAtSegwise: MadeItem[] = [
 export const madeBefore: MadeItem[] = [
   {
     name: 'Growth for a payments app for teenagers',
+    emoji: '💳',
     tag: 'FamPay · 2022–23',
     description:
       'A year of rebuilding onboarding, trying every referral idea we could think of and helping launch a subscription and custom UPI IDs, which turned out to be a surprisingly fun thing to sell to a sixteen-year-old.',
   },
   {
     name: 'EY Infinity',
+    emoji: '♾️',
     tag: 'EY · 2021',
     description:
       'A set of Python tools I built with three teammates to take hours of Oracle and SAP grunt work off the plates of the auditors around us.',
   },
   {
     name: 'A social commerce channel',
+    emoji: '🥬',
     tag: 'Orinko · 2020',
     description:
       'Two months, a hydroponics startup and no e-commerce experience at all. I signed up the partners, designed the whole journey and watched it beat the old model in its first month.',
   },
   {
     name: 'A camera that spots hazards',
+    emoji: '📹',
     tag: 'Flutura · 2019',
     description:
       'A computer-vision model that watched factory CCTV for safety hazards, which ended up inside their industrial AI product.',

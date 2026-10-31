@@ -5,6 +5,8 @@ import MenuHeader from '../components/MenuHeader.astro';
 import Todo from '../components/Todo.astro';
 import Gif from '../components/Gif.astro';
 import Note from '../components/Note.astro';
+import OrderTicket from '../components/OrderTicket.astro';
+import PlatePreview from '../components/PlatePreview.astro';
 import { site } from '../config/site';
 import { madeAtSegwise, madeBefore, kindWords, longWayRound, writing, type MadeItem } from '../config/menu';
 
@@ -23,6 +25,20 @@ const courses = [
   { numeral: 'V', emoji: '⏪', name: 'The long way round', note: 'previously on…', id: 'long-way' },
   { numeral: 'VI', emoji: '☕', name: 'Reading', note: "director's commentary", id: 'reading' },
 ];
+
+const sideEmoji: Record<string, string> = {
+  'hungry-mother-fakir': '🍛',
+  'pop-ups': '🍽️',
+  'see-hear-taste': '💌',
+  samiksha: '📚',
+  'the-product-folks': '🤝',
+};
+const sideGif: Record<string, { src: string; alt: string }> = {
+  'hungry-mother-fakir': {
+    src: 'https://media.tenor.com/DtO-uXg1KiwAAAAM/muppets-swedish-chef.gif',
+    alt: 'The Swedish Chef from the Muppets cooking chaotically',
+  },
+};
 
 const groups: { heading: string; items: MadeItem[] }[] = [
   { heading: 'At Segwise, 2023 to now', items: madeAtSegwise },
@@ -71,14 +87,6 @@ const groups: { heading: string; items: MadeItem[] }[] = [
     <ol class="rule-list">
       {site.houseRules.map((rule) => <li>{rule}</li>)}
     </ol>
-    <Gif
-      src="https://media.tenor.com/0prCeJ87QBYAAAAM/waiting-dexter.gif"
-      alt="Dexter from Dexter's Laboratory drumming his fingers at his desk, waiting"
-      caption="Me, before coding agents, waiting for an engineer to free up."
-      side="left"
-      tilt={-4}
-      top="20px"
-    />
   </section>
 
   <section id="made" class="course" aria-labelledby="made-title">
@@ -87,16 +95,18 @@ const groups: { heading: string; items: MadeItem[] }[] = [
       Most days I'm somewhere in the same loop of talking to a customer, spotting what's missing and building
       whatever fills the gap. These are a few of the things that came out of it.
     </p>
+    <p class="center"><Note tilt={-2}>Tap + on anything you'd like to hear more about, and it goes on your order ↓</Note></p>
     {groups.map((group) => (
       <div class="group">
         <h3 class="label group-title">{group.heading}</h3>
         <ul class="items">
           {group.items.map((item) => (
-            <li class="item">
+            <li class="item" data-plate data-emoji={item.emoji} data-gif={item.gif?.src} data-gif-alt={item.gif?.alt}>
               <div class="leader-row">
                 <span class="i-name">{item.href ? <a href={item.href}>{item.name}</a> : item.name}</span>
                 <span class="dots" aria-hidden="true"></span>
                 <span class="i-tag">{item.tag}</span>
+                <button type="button" class="add" data-add={item.name} aria-pressed="false" aria-label={`Add ${item.name} to your order`}>+</button>
               </div>
               <p class="i-desc">
                 {item.description}
@@ -120,12 +130,13 @@ const groups: { heading: string; items: MadeItem[] }[] = [
     <MenuHeader numeral="III" course="After the credits" title="Off the clock" id="sides-title" />
     <p class="intro">{site.offTheClock}</p>
     <ul class="items">
-      {sides.map(({ data }) => (
-        <li class="item">
+      {sides.map(({ id, data }) => (
+        <li class="item" data-plate data-emoji={sideEmoji[id]} data-gif={sideGif[id]?.src} data-gif-alt={sideGif[id]?.alt}>
           <div class="leader-row">
             <span class="i-name">{data.link ? <a href={data.link}>{data.title}</a> : data.title}</span>
             <span class="dots" aria-hidden="true"></span>
             <span class="i-tag">{data.kind}</span>
+            <button type="button" class="add" data-add={data.title} aria-pressed="false" aria-label={`Add ${data.title} to your order`}>+</button>
           </div>
           <p class="i-desc"><Todo text={data.blurb} /></p>
         </li>
@@ -181,6 +192,8 @@ const groups: { heading: string; items: MadeItem[] }[] = [
       ))}
     </ul>
   </section>
+  <PlatePreview />
+  <OrderTicket />
 </BaseLayout>
 
 <style>
@@ -364,6 +377,41 @@ const groups: { heading: string; items: MadeItem[] }[] = [
     font-family: var(--font-mono);
     font-size: 0.72rem;
     letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .add {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    margin-left: 0.35rem;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    align-self: center;
+    transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .add:hover {
+    transform: rotate(90deg) scale(1.1);
+  }
+  .add[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--on-accent);
+    transform: none;
+  }
+  [data-plate] .dots {
+    transition: border-color 0.2s ease;
+  }
+  [data-plate]:hover .dots {
+    border-bottom-color: var(--accent);
+  }
+  [data-plate]:hover .i-name {
     color: var(--accent);
   }
   .i-desc {

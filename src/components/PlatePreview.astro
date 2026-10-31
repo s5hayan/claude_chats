@@ -1,0 +1,89 @@
+---
+// Hovering a dish brings its "plate" out: a polaroid that follows the cursor,
+// showing the dish's GIF or a big emoji. Mouse and trackpad only; touch readers
+// and anyone who prefers reduced motion don't get it.
+---
+
+<div class="plate-preview" data-plate-preview aria-hidden="true">
+  <div class="plate-inner" data-plate-inner></div>
+</div>
+
+<script>
+  const preview = document.querySelector<HTMLElement>('[data-plate-preview]');
+  const inner = preview?.querySelector<HTMLElement>('[data-plate-inner]');
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const colours = ['#e8b931', '#ef8a6d', '#8cc7a9', '#f3a9c9', '#9fc3f0'];
+
+  if (preview && inner && fine && !calm) {
+    let x = 0;
+    let y = 0;
+    let frame = 0;
+    const move = () => {
+      preview.style.transform = `translate(${x + 36}px, ${y - 175}px) rotate(var(--tilt))`;
+      frame = 0;
+    };
+    document.querySelectorAll<HTMLElement>('[data-plate]').forEach((dish, i) => {
+      dish.addEventListener('mouseenter', () => {
+        const { gif, gifAlt, emoji } = dish.dataset;
+        inner.replaceChildren();
+        if (gif) {
+          const img = document.createElement('img');
+          img.src = gif;
+          img.alt = gifAlt ?? '';
+          inner.append(img);
+          inner.style.background = '#eee3cf';
+        } else {
+          const span = document.createElement('span');
+          span.textContent = emoji ?? '🍽️';
+          inner.append(span);
+          inner.style.background = colours[i % colours.length];
+        }
+        preview.style.setProperty('--tilt', `${i % 2 ? 4 : -4}deg`);
+        preview.classList.add('on');
+      });
+      dish.addEventListener('mouseleave', () => preview.classList.remove('on'));
+    });
+    window.addEventListener('mousemove', (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (!frame) frame = requestAnimationFrame(move);
+    });
+  }
+</script>
+
+<style>
+  .plate-preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    width: 190px;
+    padding: 8px;
+    background: #fffdf8;
+    box-shadow: 0 14px 30px rgb(40 20 10 / 0.3);
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.85;
+    transition: opacity 0.15s ease, scale 0.15s ease;
+  }
+  .plate-preview.on {
+    opacity: 1;
+    scale: 1;
+  }
+  .plate-inner {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+  .plate-inner :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .plate-inner :global(span) {
+    font-size: 4.2rem;
+    line-height: 1;
+  }
+</style>

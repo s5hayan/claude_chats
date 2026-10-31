@@ -1,0 +1,176 @@
+---
+// The order ticket. Readers tap "+" on any dish to add it; the ticket collects
+// their picks and "Send to the kitchen" opens an email to Shayan listing them.
+import { site } from '../config/site';
+---
+
+<aside class="ticket" data-ticket hidden aria-labelledby="ticket-title">
+  <button type="button" class="ticket-tab" data-ticket-toggle aria-expanded="false">
+    <span aria-hidden="true">🧾</span>
+    <span id="ticket-title">Your order</span>
+    <span class="count" data-ticket-count>0</span>
+  </button>
+  <div class="ticket-body" data-ticket-body hidden>
+    <p class="t-head">Table for one · Order no. <span data-ticket-no></span></p>
+    <ol class="t-list" data-ticket-list></ol>
+    <p class="t-note">Pick what you'd like to hear more about, and I'll bring it out over email.</p>
+    <a class="btn btn-hot send" data-ticket-send href={`mailto:${site.contact.email}`}>Send to the kitchen →</a>
+    <button type="button" class="clear" data-ticket-clear>Clear the table</button>
+  </div>
+</aside>
+
+<script>
+  import { site } from '../config/site';
+
+  const ticket = document.querySelector<HTMLElement>('[data-ticket]');
+  const list = ticket?.querySelector<HTMLOListElement>('[data-ticket-list]');
+  const count = ticket?.querySelector<HTMLElement>('[data-ticket-count]');
+  const body = ticket?.querySelector<HTMLElement>('[data-ticket-body]');
+  const toggle = ticket?.querySelector<HTMLButtonElement>('[data-ticket-toggle]');
+  const send = ticket?.querySelector<HTMLAnchorElement>('[data-ticket-send]');
+  const no = ticket?.querySelector<HTMLElement>('[data-ticket-no]');
+  if (no) no.textContent = String(Math.floor(Math.random() * 90) + 10);
+
+  let order: string[] = [];
+  try {
+    order = JSON.parse(sessionStorage.getItem('order') ?? '[]');
+  } catch {}
+
+  const render = () => {
+    if (!ticket || !list || !count || !send) return;
+    ticket.hidden = order.length === 0;
+    count.textContent = String(order.length);
+    list.replaceChildren(
+      ...order.map((name) => {
+        const li = document.createElement('li');
+        li.textContent = name;
+        return li;
+      }),
+    );
+    const lines = order.map((name) => `- ${name}`).join('\n');
+    const mail = `Hi Shayan,\n\nI'd like to hear more about:\n${lines}\n\n`;
+    send.href = `mailto:${site.contact.email}?subject=${encodeURIComponent('An order from your menu')}&body=${encodeURIComponent(mail)}`;
+    document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) => {
+      const added = order.includes(button.dataset.add ?? '');
+      button.setAttribute('aria-pressed', String(added));
+      button.textContent = added ? '✓' : '+';
+    });
+    try {
+      sessionStorage.setItem('order', JSON.stringify(order));
+    } catch {}
+  };
+
+  const setOpen = (open: boolean) => {
+    if (body) body.hidden = !open;
+    toggle?.setAttribute('aria-expanded', String(open));
+  };
+
+  document.querySelectorAll<HTMLButtonElement>('[data-add]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const name = button.dataset.add ?? '';
+      const wasEmpty = order.length === 0;
+      order = order.includes(name) ? order.filter((n) => n !== name) : [...order, name];
+      render();
+      // Open the ticket on the first pick, except on small screens where it would cover the page.
+      if (wasEmpty && order.length && window.innerWidth >= 720) setOpen(true);
+      ticket?.classList.remove('bump');
+      void ticket?.offsetWidth;
+      ticket?.classList.add('bump');
+    });
+  });
+  toggle?.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+  ticket?.querySelector('[data-ticket-clear]')?.addEventListener('click', () => {
+    order = [];
+    render();
+  });
+  render();
+</script>
+
+<style>
+  .ticket {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 40;
+    width: min(300px, calc(100vw - 32px));
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: #231a14;
+    filter: drop-shadow(0 12px 24px rgb(40 20 10 / 0.3));
+  }
+  .ticket.bump {
+    animation: bump 0.35s ease;
+  }
+  @keyframes bump {
+    40% {
+      transform: translateY(-6px) rotate(-1deg);
+    }
+  }
+  .ticket-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: #fffdf6;
+    border: 0;
+    font: inherit;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: inherit;
+  }
+  .count {
+    margin-left: auto;
+    min-width: 1.6em;
+    padding: 0.1em 0.45em;
+    border-radius: 999px;
+    background: #b3261e;
+    color: #fbf4e6;
+    text-align: center;
+  }
+  .ticket-body {
+    display: grid;
+    gap: 0.7rem;
+    padding: 0 1rem 1.4rem;
+    background: #fffdf6;
+    /* torn receipt edge */
+    mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / 14px 100%;
+  }
+  .ticket-body[hidden] {
+    display: none;
+  }
+  .t-head {
+    border-top: 1px dashed #bfae92;
+    padding-top: 0.7rem;
+    color: #6e5d4e;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+  .t-list {
+    margin: 0;
+    padding-left: 1.4em;
+    list-style: decimal;
+    display: grid;
+    gap: 0.3rem;
+    font-family: var(--font-serif);
+    font-size: 0.95rem;
+  }
+  .t-note {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: #6e5d4e;
+  }
+  .send {
+    justify-content: center;
+  }
+  .clear {
+    background: none;
+    border: 0;
+    font: inherit;
+    font-size: 0.7rem;
+    text-decoration: underline;
+    color: #6e5d4e;
+    cursor: pointer;
+  }
+</style>

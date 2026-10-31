@@ -12,6 +12,7 @@ const Tag = level;
 ---
 
 <header class="menu-header">
+  {numeral && <span class="giant" aria-hidden="true">{numeral}</span>}
   {(numeral || course) && (
     <p class="label course">
       {numeral && <span class="numeral">{numeral}</span>}
@@ -24,10 +25,27 @@ const Tag = level;
 
 <style>
   .menu-header {
+    position: relative;
+    isolation: isolate;
     display: grid;
     justify-items: center;
     gap: 0.55rem;
     text-align: center;
+  }
+  /* A huge outlined course numeral sitting behind the heading */
+  .giant {
+    position: absolute;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-6deg);
+    font-family: var(--font-display);
+    font-size: clamp(7rem, 22vw, 11rem);
+    line-height: 1;
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--accent) 22%, transparent);
+    pointer-events: none;
+    user-select: none;
   }
   .course {
     display: flex;
