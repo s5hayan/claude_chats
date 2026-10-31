@@ -23,8 +23,8 @@ const [before, after] = site.headline.split(site.headlineHighlight);
       </h1>
       <p class="bio">{site.bio}</p>
       <div class="meta">
-        <span class="chip"><span class="dot" aria-hidden="true"></span>{site.location} · {site.availability}</span>
-        <span class="roles">Looking at: {site.targetRoles.join(' · ')}</span>
+        <span class="chip"><span class="dot" aria-hidden="true"></span>{site.location} · {site.status}</span>
+        <span class="roles">{site.crafts.join(' · ')}</span>
       </div>
       <div class="ctas">
         <a href="/work/" class="btn btn-hot">See the Mains →</a>
@@ -45,8 +45,8 @@ const [before, after] = site.headline.split(site.headlineHighlight);
 
   <section class="looking" aria-labelledby="looking-title">
     <div class="container-page looking-inner">
-      <MenuHeader course="Chef's table" title="What I'm looking for" id="looking-title" />
-      <p class="looking-copy"><Todo text={site.lookingFor} /></p>
+      <MenuHeader course="Chef's table" title="Off the clock" id="looking-title" />
+      <p class="looking-copy"><Todo text={site.offTheClock} /></p>
       <Sticker name="passport" size={150} rotate={-6} class="passport" />
     </div>
   </section>
