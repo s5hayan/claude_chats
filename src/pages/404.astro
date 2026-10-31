@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Gif from '../components/Gif.astro';
 ---
 
 <BaseLayout title="Not on the menu" showBook={false}>
@@ -7,6 +8,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p class="label">404</p>
     <h1>That's not on the menu.</h1>
     <p>Whatever you ordered doesn't exist, or the kitchen has taken it off for the season.</p>
+    <Gif
+      src="https://media.tenor.com/0FyLC3FdRL8AAAAM/scared-courage.gif"
+      alt="Courage the Cowardly Dog cowering in fright on an armchair"
+      caption="The things I do for this website."
+      tilt={-3}
+    />
     <a class="btn btn-hot" href="/">Back to the menu</a>
   </div>
 </BaseLayout>

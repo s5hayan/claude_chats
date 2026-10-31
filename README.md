@@ -26,6 +26,7 @@ npm run check:todo # fails while any TODO placeholder is still on the built site
 | Side Dishes | `src/content/sides/*.md` |
 | Today's Specials | `src/content/now/index.md` |
 | Colours and fonts | `src/styles/tokens.css` |
+| GIFs (hot-linked from Tenor) | `<Gif>` tags in `src/pages/index.astro`, `BookATable.astro` and `404.astro` |
 
 Any text containing `TODO` is highlighted on the page so gaps are easy to spot.
 Content files are type-checked at build time, so a missing frontmatter field fails the build.

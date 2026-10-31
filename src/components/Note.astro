@@ -1,0 +1,18 @@
+---
+// A handwritten red-pen note scribbled on the menu.
+interface Props {
+  tilt?: number;
+  class?: string;
+}
+const { tilt = -4, class: className } = Astro.props;
+---
+
+<span class:list={['note', 'hand', className]} style={`--tilt: ${tilt}deg`}><slot /></span>
+
+<style>
+  .note {
+    display: inline-block;
+    font-size: 1.35rem;
+    transform: rotate(var(--tilt));
+  }
+</style>

@@ -1,11 +1,12 @@
 ---
 import { site } from '../config/site';
+import Gif from './Gif.astro';
 
 const { email, linkedin, github } = site.contact;
 ---
 
 <section id="book" class="book" aria-labelledby="book-title">
-  <p class="label">Reservations</p>
+  <p class="label">🍽️ Reservations</p>
   <h2 id="book-title">Book a Table</h2>
   <p class="lede">
     If you'd like to swap notes on product or customer success, build something with AI agents, or come along on a
@@ -16,6 +17,12 @@ const { email, linkedin, github } = site.contact;
     <li><a class="btn" href={linkedin} rel="me">LinkedIn ↗</a></li>
     <li><a class="btn" href={github} rel="me">GitHub ↗</a></li>
   </ul>
+  <Gif
+    src="https://media.tenor.com/01liHPUMFooAAAAM/coraje-el-perro-cobarde-saludando-courage-the-cowardly-dog-smile-hi.gif"
+    alt="Courage the Cowardly Dog smiling nervously and waving hello"
+    caption="Say hi. I'm much friendlier than Eustace."
+    tilt={3}
+  />
 </section>
 
 <style>

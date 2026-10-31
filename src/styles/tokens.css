@@ -21,6 +21,7 @@
   --font-serif: 'Young Serif', Georgia, 'Times New Roman', serif;
   --font-body: 'Instrument Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --font-hand: 'Caveat', 'Comic Sans MS', cursive;
 }
 
 :root {
@@ -35,6 +36,7 @@
   --highlight: var(--color-mustard);
   --on-highlight: var(--color-ink);
   --herb: var(--color-herb);
+  --pen: var(--color-red);
 
   --card-shadow: 0 1px 0 #fff inset, 0 18px 40px rgb(60 40 20 / 0.16);
 
@@ -58,6 +60,7 @@
     --highlight: #e8b931;
     --on-highlight: #1a120d;
     --herb: #7fc2a8;
+    --pen: #ff8a76;
     --card-shadow: 0 18px 40px rgb(0 0 0 / 0.45);
   }
 }

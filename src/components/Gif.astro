@@ -1,0 +1,81 @@
+---
+// A GIF taped to the menu like a polaroid, with a handwritten caption.
+// `side` pins it to the table beside the menu on wide screens; it sits inline otherwise.
+// GIFs are hot-linked from Tenor. Readers who prefer reduced motion don't see them.
+interface Props {
+  src: string;
+  alt: string;
+  caption: string;
+  side?: 'left' | 'right' | 'inline';
+  tilt?: number;
+  top?: string;
+}
+const { src, alt, caption, side = 'inline', tilt = -3, top = '0' } = Astro.props;
+---
+
+<figure class:list={['gif', `side-${side}`]} style={`--tilt: ${tilt}deg; --top: ${top}`}>
+  <span class="tape" aria-hidden="true"></span>
+  <img src={src} alt={alt} loading="lazy" decoding="async" width="220" height="165" />
+  <figcaption class="hand">{caption}</figcaption>
+</figure>
+
+<style>
+  .gif {
+    width: min(100%, 230px);
+    margin: 0.5rem auto;
+    padding: 10px 10px 8px;
+    background: #fffdf8;
+    box-shadow: 0 10px 24px rgb(40 20 10 / 0.28);
+    transform: rotate(var(--tilt));
+    transition: transform 0.2s ease;
+    position: relative;
+    z-index: 2;
+  }
+  .gif:hover {
+    transform: rotate(0deg) scale(1.04);
+  }
+  .tape {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 84px;
+    height: 24px;
+    transform: translateX(-50%) rotate(-4deg);
+    background: color-mix(in srgb, var(--highlight) 60%, transparent);
+    mix-blend-mode: multiply;
+  }
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: #eee3cf;
+  }
+  figcaption {
+    margin-top: 6px;
+    font-size: 1.15rem;
+    text-align: center;
+    color: #b3261e;
+  }
+  @media (min-width: 1360px) {
+    .side-left,
+    .side-right {
+      position: absolute;
+      top: var(--top);
+      width: 220px;
+      margin: 0;
+    }
+    .side-left {
+      left: -300px;
+    }
+    .side-right {
+      right: -300px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gif {
+      display: none;
+    }
+  }
+</style>

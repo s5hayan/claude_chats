@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MenuHeader from '../components/MenuHeader.astro';
 import Todo from '../components/Todo.astro';
+import Gif from '../components/Gif.astro';
+import Note from '../components/Note.astro';
 import { site } from '../config/site';
 import { madeAtSegwise, madeBefore, kindWords, longWayRound, writing, type MadeItem } from '../config/menu';
 
@@ -14,12 +16,12 @@ const sides = (await getCollection('sides'))
 const [before, after] = site.headline.split(site.headlineHighlight);
 
 const courses = [
-  { numeral: 'I', name: 'House rules', note: 'how I cook', id: 'rules' },
-  { numeral: 'II', name: "Things I've made", note: 'the mains', id: 'made' },
-  { numeral: 'III', name: 'Off the clock', note: 'side dishes', id: 'sides' },
-  { numeral: 'IV', name: 'Kind words', note: 'from the guestbook', id: 'kind-words' },
-  { numeral: 'V', name: 'The long way round', note: 'how I got here', id: 'long-way' },
-  { numeral: 'VI', name: 'Reading', note: 'with your coffee', id: 'reading' },
+  { numeral: 'I', emoji: '📜', name: 'House rules', note: 'the fine print', id: 'rules' },
+  { numeral: 'II', emoji: '🔥', name: "Things I've made", note: 'let him cook', id: 'made' },
+  { numeral: 'III', emoji: '📺', name: 'Off the clock', note: 'after the credits', id: 'sides' },
+  { numeral: 'IV', emoji: '⭐', name: 'Kind words', note: 'the reviews are in', id: 'kind-words' },
+  { numeral: 'V', emoji: '⏪', name: 'The long way round', note: 'previously on…', id: 'long-way' },
+  { numeral: 'VI', emoji: '☕', name: 'Reading', note: "director's commentary", id: 'reading' },
 ];
 
 const groups: { heading: string; items: MadeItem[] }[] = [
@@ -35,6 +37,15 @@ const groups: { heading: string; items: MadeItem[] }[] = [
     <p class="headline">{before}<em>{site.headlineHighlight}</em>{after}</p>
     <p class="bio">{site.bio}</p>
     <p class="status"><span class="dot" aria-hidden="true"></span>{site.status}</p>
+    <Note tilt={-3}>“Awesome” is still my favourite word. You've been warned.</Note>
+    <Gif
+      src="https://media.tenor.com/-gEj5ta6_FkAAAAM/ratatouille-chef.gif"
+      alt="Colette cooking in the kitchen in Ratatouille"
+      caption="“Anyone can cook.” Gusteau was right, it just took me a while to believe him."
+      side="right"
+      tilt={4}
+      top="40px"
+    />
     <p class="ornament" aria-hidden="true">✦ ✦ ✦</p>
   </section>
 
@@ -44,6 +55,7 @@ const groups: { heading: string; items: MadeItem[] }[] = [
       {courses.map((c) => (
         <li>
           <a href={`#${c.id}`} class="leader-row">
+            <span class="c-emoji" aria-hidden="true">{c.emoji}</span>
             <span class="c-name">{c.name}</span>
             <small class="c-note">{c.note}</small>
             <span class="dots" aria-hidden="true"></span>
@@ -55,14 +67,22 @@ const groups: { heading: string; items: MadeItem[] }[] = [
   </nav>
 
   <section id="rules" class="course" aria-labelledby="rules-title">
-    <MenuHeader numeral="I" course="Please note" title="House rules" id="rules-title" />
+    <MenuHeader numeral="I" course="The fine print" title="House rules" id="rules-title" />
     <ol class="rule-list">
       {site.houseRules.map((rule) => <li>{rule}</li>)}
     </ol>
+    <Gif
+      src="https://media.tenor.com/0prCeJ87QBYAAAAM/waiting-dexter.gif"
+      alt="Dexter from Dexter's Laboratory drumming his fingers at his desk, waiting"
+      caption="Me, before coding agents, waiting for an engineer to free up."
+      side="left"
+      tilt={-4}
+      top="20px"
+    />
   </section>
 
   <section id="made" class="course" aria-labelledby="made-title">
-    <MenuHeader numeral="II" course="The mains" title="Things I've made" id="made-title" />
+    <MenuHeader numeral="II" course="Let him cook" title="Things I've made" id="made-title" />
     <p class="intro">
       Most days I'm somewhere in the same loop of talking to a customer, spotting what's missing and building
       whatever fills the gap. These are a few of the things that came out of it.
@@ -97,7 +117,7 @@ const groups: { heading: string; items: MadeItem[] }[] = [
   </section>
 
   <section id="sides" class="course" aria-labelledby="sides-title">
-    <MenuHeader numeral="III" course="Side dishes" title="Off the clock" id="sides-title" />
+    <MenuHeader numeral="III" course="After the credits" title="Off the clock" id="sides-title" />
     <p class="intro">{site.offTheClock}</p>
     <ul class="items">
       {sides.map(({ data }) => (
@@ -115,7 +135,8 @@ const groups: { heading: string; items: MadeItem[] }[] = [
   </section>
 
   <section id="kind-words" class="course" aria-labelledby="kind-title">
-    <MenuHeader numeral="IV" course="From the guestbook" title="Kind words" id="kind-title" />
+    <MenuHeader numeral="IV" course="The reviews are in" title="Kind words" id="kind-title" />
+    <p class="center"><Note tilt={2}>I didn't pay any of them, promise.</Note></p>
     <div class="quotes">
       {kindWords.map((k) => (
         <figure class="quote">
@@ -130,7 +151,8 @@ const groups: { heading: string; items: MadeItem[] }[] = [
   </section>
 
   <section id="long-way" class="course" aria-labelledby="long-title">
-    <MenuHeader numeral="V" course="How I got here" title="The long way round" id="long-title" />
+    <MenuHeader numeral="V" course="Previously on…" title="The long way round" id="long-title" />
+    <p class="intro">Like any good recap, this one skips the boring episodes.</p>
     <ol class="stops">
       {longWayRound.map((s) => (
         <li class="stop">
@@ -142,7 +164,7 @@ const groups: { heading: string; items: MadeItem[] }[] = [
   </section>
 
   <section id="reading" class="course" aria-labelledby="reading-title">
-    <MenuHeader numeral="VI" course="With your coffee" title="Reading" id="reading-title" />
+    <MenuHeader numeral="VI" course="Director's commentary" title="Reading" id="reading-title" />
     <p class="intro">
       A few essays from 2021, back when I spent my weekends taking apart why some tech companies win. I'd argue
       with parts of them now, which feels like a good sign.
@@ -164,6 +186,7 @@ const groups: { heading: string; items: MadeItem[] }[] = [
 <style>
   /* Masthead */
   .mast {
+    position: relative;
     display: grid;
     justify-items: center;
     gap: 1rem;
@@ -224,6 +247,10 @@ const groups: { heading: string; items: MadeItem[] }[] = [
     padding-block: 0.4rem;
     text-decoration: none;
   }
+  .c-emoji {
+    width: 1.6rem;
+    flex-shrink: 0;
+  }
   .c-name {
     font-family: var(--font-serif);
     font-size: 1.12rem;
@@ -251,6 +278,7 @@ const groups: { heading: string; items: MadeItem[] }[] = [
 
   /* Courses */
   .course {
+    position: relative;
     display: grid;
     gap: 1.5rem;
     margin-top: clamp(3rem, 8vw, 4.5rem);
