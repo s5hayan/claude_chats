@@ -10,33 +10,25 @@ const updated = entry.data.updated.toLocaleDateString('en-GB', { day: 'numeric',
 ---
 
 <BaseLayout title="Today's Specials" description="What Mohamed Shayan is working on, eating, watching and following this month.">
-  <div class="container-page page">
-    <MenuHeader course="Today's Specials" title="On the board this month" level="h1" />
-    <p class="board label">Updated {updated} · {entry.data.location}</p>
-    <div class="prose-menu specials">
-      <Content />
-    </div>
+  <MenuHeader course="Today's specials" title="On the board this month" level="h1" />
+  <p class="board label">Chalked up {updated} · {entry.data.location}</p>
+  <div class="prose-menu specials">
+    <Content />
   </div>
 </BaseLayout>
 
 <style>
-  .page {
-    display: grid;
-    gap: 1.5rem;
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
   .board {
-    width: fit-content;
-    background: var(--inverse-bg);
-    color: var(--yolk);
-    padding: 0.4em 0.8em;
+    margin: 1.2rem 0 2rem;
+    text-align: center;
+  }
+  .specials {
+    margin-inline: auto;
   }
   .specials :global(h2) {
-    background: var(--yolk);
-    color: var(--on-accent);
-    border: var(--line-thin) solid var(--edge);
-    width: fit-content;
-    padding: 0.1em 0.3em;
-    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-size: 1.5rem;
+  }
+  .specials :global(h2:first-child) {
+    margin-top: 0;
   }
 </style>

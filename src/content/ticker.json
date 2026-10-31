@@ -1,7 +1,0 @@
-[
-  { "id": "watching", "verb": "Watching", "text": "TODO: what you're watching" },
-  { "id": "listening", "verb": "Listening", "text": "TODO: what you're listening to" },
-  { "id": "eating", "verb": "Eating", "text": "TODO: best thing you ate this month" },
-  { "id": "following", "verb": "Following", "text": "TODO: team, league or story you're following" },
-  { "id": "building", "verb": "Building", "text": "This site, by directing Claude Code" }
-]

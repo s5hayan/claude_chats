@@ -1,232 +1,440 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import DishCard from '../components/DishCard.astro';
 import MenuHeader from '../components/MenuHeader.astro';
-import Sticker from '../components/Sticker.astro';
 import Todo from '../components/Todo.astro';
 import { site } from '../config/site';
+import { madeAtSegwise, madeBefore, kindWords, longWayRound, writing, type MadeItem } from '../config/menu';
 
-const proof = (await getCollection('proof')).sort((a, b) => a.data.order - b.data.order);
-const tilts = [-1.5, 1, -0.5, 1.5];
+const sides = (await getCollection('sides'))
+  .filter(({ data }) => ['Food', 'Newsletter', 'Community'].includes(data.kind))
+  .sort((a, b) => a.data.order - b.data.order);
 
-// Split the headline so the highlighted phrase gets the yolk marker.
+// Split the headline so the highlighted phrase is set in red italics.
 const [before, after] = site.headline.split(site.headlineHighlight);
+
+const courses = [
+  { numeral: 'I', name: 'House rules', note: 'how I cook', id: 'rules' },
+  { numeral: 'II', name: "Things I've made", note: 'the mains', id: 'made' },
+  { numeral: 'III', name: 'Off the clock', note: 'side dishes', id: 'sides' },
+  { numeral: 'IV', name: 'Kind words', note: 'from the guestbook', id: 'kind-words' },
+  { numeral: 'V', name: 'The long way round', note: 'how I got here', id: 'long-way' },
+  { numeral: 'VI', name: 'Reading', note: 'with your coffee', id: 'reading' },
+];
+
+const groups: { heading: string; items: MadeItem[] }[] = [
+  { heading: 'At Segwise, 2023 to now', items: madeAtSegwise },
+  { heading: 'Before that', items: madeBefore },
+];
 ---
 
 <BaseLayout>
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="container-page hero-inner">
-      <p class="label">The Menu · {site.name}</p>
-      <h1 id="hero-title">
-        {before}<mark>{site.headlineHighlight}</mark>{after}
-      </h1>
-      <p class="bio">{site.bio}</p>
-      <div class="meta">
-        <span class="chip"><span class="dot" aria-hidden="true"></span>{site.location} · {site.status}</span>
-        <span class="roles">{site.crafts.join(' · ')}</span>
+  <section class="mast" aria-labelledby="hero-title">
+    <p class="label">{site.location} · {site.edition}</p>
+    <h1 id="hero-title">{site.name}</h1>
+    <p class="headline">{before}<em>{site.headlineHighlight}</em>{after}</p>
+    <p class="bio">{site.bio}</p>
+    <p class="status"><span class="dot" aria-hidden="true"></span>{site.status}</p>
+    <p class="ornament" aria-hidden="true">✦ ✦ ✦</p>
+  </section>
+
+  <nav class="contents" aria-labelledby="contents-title">
+    <p class="label" id="contents-title">Tonight's courses</p>
+    <ol>
+      {courses.map((c) => (
+        <li>
+          <a href={`#${c.id}`} class="leader-row">
+            <span class="c-name">{c.name}</span>
+            <small class="c-note">{c.note}</small>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="c-no">{c.numeral}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <section id="rules" class="course" aria-labelledby="rules-title">
+    <MenuHeader numeral="I" course="Please note" title="House rules" id="rules-title" />
+    <ol class="rule-list">
+      {site.houseRules.map((rule) => <li>{rule}</li>)}
+    </ol>
+  </section>
+
+  <section id="made" class="course" aria-labelledby="made-title">
+    <MenuHeader numeral="II" course="The mains" title="Things I've made" id="made-title" />
+    <p class="intro">
+      Most days I'm somewhere in the same loop of talking to a customer, spotting what's missing and building
+      whatever fills the gap. These are a few of the things that came out of it.
+    </p>
+    {groups.map((group) => (
+      <div class="group">
+        <h3 class="label group-title">{group.heading}</h3>
+        <ul class="items">
+          {group.items.map((item) => (
+            <li class="item">
+              <div class="leader-row">
+                <span class="i-name">{item.href ? <a href={item.href}>{item.name}</a> : item.name}</span>
+                <span class="dots" aria-hidden="true"></span>
+                <span class="i-tag">{item.tag}</span>
+              </div>
+              <p class="i-desc">
+                {item.description}
+                {item.href && (
+                  <>
+                    {' '}
+                    <a href={item.href} class="more" aria-label={`Read the story behind ${item.name}`}>
+                      Read the story →
+                    </a>
+                  </>
+                )}
+              </p>
+            </li>
+          ))}
+        </ul>
       </div>
-      <div class="ctas">
-        <a href="/work/" class="btn btn-hot">See the Mains →</a>
-        <a href="#book" class="btn">Book a Table</a>
-      </div>
-      <Sticker name="shipped" size={132} rotate={12} class="hero-sticker" />
+    ))}
+  </section>
+
+  <section id="sides" class="course" aria-labelledby="sides-title">
+    <MenuHeader numeral="III" course="Side dishes" title="Off the clock" id="sides-title" />
+    <p class="intro">{site.offTheClock}</p>
+    <ul class="items">
+      {sides.map(({ data }) => (
+        <li class="item">
+          <div class="leader-row">
+            <span class="i-name">{data.link ? <a href={data.link}>{data.title}</a> : data.title}</span>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="i-tag">{data.kind}</span>
+          </div>
+          <p class="i-desc"><Todo text={data.blurb} /></p>
+        </li>
+      ))}
+    </ul>
+    <p class="center"><a href="/sides/" class="more">Everything on the side →</a></p>
+  </section>
+
+  <section id="kind-words" class="course" aria-labelledby="kind-title">
+    <MenuHeader numeral="IV" course="From the guestbook" title="Kind words" id="kind-title" />
+    <div class="quotes">
+      {kindWords.map((k) => (
+        <figure class="quote">
+          <blockquote>“{k.quote}”</blockquote>
+          <figcaption>
+            <span class="q-name">{k.name}</span>
+            <span class="q-role">{k.role}</span>
+          </figcaption>
+        </figure>
+      ))}
     </div>
   </section>
 
-  <section class="proof" aria-labelledby="proof-title">
-    <div class="container-page proof-inner">
-      <MenuHeader course="Starters" title="The proof" id="proof-title" />
-      <p class="proof-intro">{site.proofIntro}</p>
-      <div class="cards">
-        {proof.map(({ data }, i) => <DishCard {...data} tilt={tilts[i % tilts.length]} />)}
-      </div>
-    </div>
+  <section id="long-way" class="course" aria-labelledby="long-title">
+    <MenuHeader numeral="V" course="How I got here" title="The long way round" id="long-title" />
+    <ol class="stops">
+      {longWayRound.map((s) => (
+        <li class="stop">
+          <p class="s-head"><span class="s-place">{s.place}</span><span class="s-years">{s.years}</span></p>
+          <p class="s-text">{s.text}</p>
+        </li>
+      ))}
+    </ol>
   </section>
 
-  <section class="rules" aria-labelledby="rules-title">
-    <div class="container-page rules-inner">
-      <MenuHeader course="Please note" title="House rules" id="rules-title" />
-      <ol class="rule-list">
-        {site.houseRules.map((rule) => <li>{rule}</li>)}
-      </ol>
-      <Sticker name="cricket-ball" size={96} rotate={-10} class="ball" />
-    </div>
-  </section>
-
-  <section class="looking" aria-labelledby="looking-title">
-    <div class="container-page looking-inner">
-      <MenuHeader course="Chef's table" title="Off the clock" id="looking-title" />
-      <p class="looking-copy"><Todo text={site.offTheClock} /></p>
-      <Sticker name="passport" size={150} rotate={-6} class="passport" />
-    </div>
+  <section id="reading" class="course" aria-labelledby="reading-title">
+    <MenuHeader numeral="VI" course="With your coffee" title="Reading" id="reading-title" />
+    <p class="intro">
+      A few essays from 2021, back when I spent my weekends taking apart why some tech companies win. I'd argue
+      with parts of them now, which feels like a good sign.
+    </p>
+    <ul class="items">
+      {writing.map((w) => (
+        <li class="item">
+          <div class="leader-row">
+            <span class="i-name"><a href={w.href}>{w.title}</a></span>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="i-tag">{w.where} · {w.year}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
   </section>
 </BaseLayout>
 
 <style>
-  .hero-inner {
-    position: relative;
+  /* Masthead */
+  .mast {
     display: grid;
-    gap: 1.4rem;
-    padding-block: clamp(2.5rem, 7vw, 5.5rem) clamp(2.5rem, 6vw, 4.5rem);
+    justify-items: center;
+    gap: 1rem;
+    text-align: center;
   }
   h1 {
-    font-size: clamp(2.4rem, 6.6vw, 5.2rem);
-    max-width: 17ch;
+    font-size: clamp(3rem, 11vw, 5.6rem);
+    line-height: 0.92;
   }
-  h1 mark {
-    background: var(--yolk);
-    color: var(--on-accent);
-    padding-inline: 0.06em;
-    box-decoration-break: clone;
-    -webkit-box-decoration-break: clone;
+  .headline {
+    max-width: 24ch;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 3.4vw, 1.65rem);
+    line-height: 1.3;
+  }
+  .headline em {
+    color: var(--accent);
   }
   .bio {
     max-width: 52ch;
-    font-size: 1.15rem;
+    color: var(--fg-muted);
+    font-size: 1.02rem;
   }
-  .meta {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.25rem;
-  }
-  .chip {
+  .status {
     display: inline-flex;
     align-items: center;
     gap: 0.55em;
-    background: var(--surface);
-    color: var(--on-surface);
-    border: var(--line-thin) solid var(--edge);
-    padding: 0.3em 0.8em;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--rule);
+    padding: 0.35em 0.9em;
   }
   .dot {
-    width: 0.6rem;
-    height: 0.6rem;
+    width: 0.55rem;
+    height: 0.55rem;
     border-radius: 50%;
-    background: var(--teal);
-    border: 1.5px solid var(--edge);
+    background: var(--herb);
   }
-  .roles {
-    font-size: 0.95rem;
+
+  /* Contents */
+  .contents {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: clamp(1.8rem, 5vw, 2.6rem);
+    padding: 1.2rem clamp(0.75rem, 3vw, 1.5rem);
+    border-block: 1px solid var(--rule);
+  }
+  .contents .label {
+    text-align: center;
+  }
+  .contents ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .contents a {
+    padding-block: 0.4rem;
+    text-decoration: none;
+  }
+  .c-name {
+    font-family: var(--font-serif);
+    font-size: 1.12rem;
+  }
+  .c-note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--fg-muted);
   }
-  .ctas {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.9rem;
+  .c-no {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
   }
-  .hero-inner :global(.hero-sticker) {
-    position: absolute;
-    right: var(--gutter);
-    top: clamp(2rem, 6vw, 4.5rem);
+  .contents a:hover .c-name {
+    color: var(--accent);
   }
-  @media (max-width: 860px) {
-    .hero-inner :global(.hero-sticker) {
-      width: 84px;
-      height: 84px;
-      top: 1.25rem;
+  @media (max-width: 480px) {
+    .c-note {
+      display: none;
     }
   }
 
-  .proof {
-    background: var(--bg-alt);
-    border-top: var(--line) solid var(--edge);
-  }
-  .proof-inner {
+  /* Courses */
+  .course {
     display: grid;
-    gap: 2rem;
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
-  .cards {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
+    margin-top: clamp(3rem, 8vw, 4.5rem);
+    scroll-margin-top: 1rem;
   }
-  @media (min-width: 600px) {
-    .cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .intro {
+    max-width: 54ch;
+    margin-inline: auto;
+    text-align: center;
+    font-size: 1.08rem;
+    line-height: 1.55;
   }
-  @media (min-width: 1040px) {
-    .cards {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
-
-  .proof-intro {
-    max-width: 58ch;
-    font-size: 1.1rem;
-    color: var(--fg-muted);
+  .center {
+    text-align: center;
   }
 
-  .rules {
-    border-top: var(--line) solid var(--edge);
-  }
-  .rules-inner {
-    position: relative;
-    display: grid;
-    gap: 1.75rem;
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
+  /* House rules */
   .rule-list {
     counter-reset: rule;
+    display: grid;
+    gap: 1.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rule-list li {
+    counter-increment: rule;
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.6rem;
+    align-items: baseline;
+    font-size: 1.12rem;
+    line-height: 1.5;
+  }
+  .rule-list li::before {
+    content: counter(rule, upper-roman) '.';
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  /* Menu items */
+  .group {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .group-title {
+    text-align: center;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+  }
+  .group + .group {
+    margin-top: 1rem;
+  }
+  .items {
     display: grid;
     gap: 1.25rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    max-width: 62ch;
   }
-  .rule-list li {
-    counter-increment: rule;
+  .item {
     display: grid;
-    grid-template-columns: 3.2rem minmax(0, 1fr);
-    gap: 1rem;
-    align-items: baseline;
-    font-size: 1.2rem;
-    line-height: 1.5;
+    gap: 0.3rem;
   }
-  .rule-list li::before {
-    content: counter(rule, decimal-leading-zero);
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 2rem;
-    line-height: 1;
-    color: var(--tomato);
-    text-shadow: var(--glow);
+  .i-name {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.3;
+    min-width: 0;
   }
-  .rules-inner :global(.ball) {
-    position: absolute;
-    right: var(--gutter);
-    top: 2.5rem;
+  .i-name a {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
   }
-  @media (max-width: 860px) {
-    .rules-inner :global(.ball) {
-      display: none;
-    }
+  .i-name a:hover {
+    text-decoration-color: var(--accent);
+  }
+  .i-tag {
+    flex-shrink: 0;
+    max-width: 45%;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .i-desc {
+    max-width: 60ch;
+    color: var(--fg-muted);
+    font-size: 0.97rem;
+  }
+  .more {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
   }
 
-  .looking-inner {
+  /* Kind words */
+  .quotes {
+    display: grid;
+    gap: 1.6rem;
+  }
+  .quote {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    border-left: 2px solid var(--accent);
+  }
+  blockquote {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.12rem;
+    line-height: 1.5;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .q-role {
+    color: var(--fg-muted);
+  }
+
+  /* The long way round */
+  .stops {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .stop {
     position: relative;
     display: grid;
-    gap: 1.5rem;
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+    gap: 0.3rem;
+    padding: 0 0 1.5rem 1.8rem;
+    border-left: 1px dashed var(--rule);
+    margin-left: 0.4rem;
   }
-  .looking-copy {
-    max-width: var(--measure);
-    font-size: 1.2rem;
+  .stop:last-child {
+    border-left-color: transparent;
+    padding-bottom: 0;
   }
-  .looking-inner :global(.passport) {
+  .stop::before {
+    content: '';
     position: absolute;
-    right: var(--gutter);
-    bottom: 2rem;
+    left: -0.4rem;
+    top: 0.35rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
   }
-  @media (max-width: 860px) {
-    .looking-inner :global(.passport) {
-      display: none;
-    }
+  .stop:last-child::before {
+    background: var(--accent);
+  }
+  .s-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.8rem;
+  }
+  .s-place {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+  }
+  .s-years {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .s-text {
+    max-width: 60ch;
+    color: var(--fg-muted);
   }
 </style>

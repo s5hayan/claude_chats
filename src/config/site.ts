@@ -1,9 +1,7 @@
 // Site-wide copy and links. Edit here; pages read from this file.
-export type Variant = 'ramen' | 'diner';
-
+// The home page's longer lists (things I've made, kind words, the long way round,
+// writing) live in src/config/menu.ts.
 export const site = {
-  // Which look the whole site uses: 'ramen' (Late-Night Ramen) or 'diner' (Diner Special).
-  variant: 'ramen' as Variant,
   name: 'Mohamed Shayan',
   shortName: 'Shayan',
   description:
@@ -16,9 +14,8 @@ export const site = {
   status: 'Currently cooking at Segwise.ai',
   // The areas of work shown under the bio
   crafts: ['Product', 'Customer Success', 'Growth', 'Building with AI agents'],
-  // Line under "The proof" heading on the home page
-  proofIntro:
-    "Most days I'm somewhere in the same loop of talking to a customer, spotting what's missing and building whatever fills the gap. Here's what that has added up to so far.",
+  // Printed at the top of the menu card
+  edition: 'Menu No. 1 · Autumn 2026',
   // "House rules" on the home page: how you work
   houseRules: [
     "Talk to your customers every day, because even when they can't put the problem into words, they'll still show you what to build next.",

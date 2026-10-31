@@ -1,39 +1,60 @@
 ---
-// Section heading styled like a menu course: small course label, big title, ruled line.
+// A course heading on the menu: roman numeral and course name, then the title.
 interface Props {
+  numeral?: string;
   course?: string;
   title: string;
   level?: 'h1' | 'h2';
   id?: string;
 }
-const { course, title, level = 'h2', id } = Astro.props;
+const { numeral, course, title, level = 'h2', id } = Astro.props;
 const Tag = level;
 ---
 
-<div class="menu-header">
-  {course && <p class="label course">{course}</p>}
+<header class="menu-header">
+  {(numeral || course) && (
+    <p class="label course">
+      {numeral && <span class="numeral">{numeral}</span>}
+      {course}
+    </p>
+  )}
   <Tag id={id} class:list={['title', level]}>{title}</Tag>
-  <div class="rule" aria-hidden="true"></div>
-</div>
+  <div class="rule" aria-hidden="true"><span>✦</span></div>
+</header>
 
 <style>
   .menu-header {
     display: grid;
-    gap: 0.6rem;
+    justify-items: center;
+    gap: 0.55rem;
+    text-align: center;
   }
   .course {
-    color: var(--fg-muted);
+    display: flex;
+    gap: 0.8em;
+    align-items: baseline;
+  }
+  .numeral {
+    color: var(--accent);
   }
   .title.h1 {
-    font-size: clamp(2.8rem, 9vw, 6rem);
+    font-size: clamp(2.6rem, 8vw, 4.4rem);
   }
   .title.h2 {
-    font-size: clamp(2rem, 5.5vw, 3.5rem);
+    font-size: clamp(2rem, 5.5vw, 2.9rem);
   }
   .rule {
-    height: 10px;
-    border-top: var(--line) solid var(--edge);
-    border-bottom: 1px solid var(--edge);
-    max-width: 12rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: min(14rem, 60%);
+    color: var(--accent);
+    font-size: 0.6rem;
+  }
+  .rule::before,
+  .rule::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--rule);
   }
 </style>

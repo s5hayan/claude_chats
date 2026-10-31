@@ -1,12 +1,9 @@
 # Shayan's personal site
 
-Phase 1 of the site described in the build brief: a restaurant-menu personal site with two looks.
-
-- **Late-Night Ramen** (`ramen`, current): a dim ramen bar. Ink-dark room, neon red, a noren
-  curtain down the left edge, and proof cards as torn order slips.
-- **Diner Special** (`diner`): brutalist pop. Cream paper, ink outlines, tomato, yolk and teal.
-
-Switch with `variant` in `src/config/site.ts`.
+A personal site laid out as a printed restaurant menu: a paper card on a wooden table, with
+courses, dotted leaders and one deep red accent. It switches to a candlelit dark version when
+the reader's device is in dark mode. The menu is the permanent structure; future "seasons" can
+give it a new look without changing the content.
 
 Built with Astro, Tailwind CSS and MDX. Static output, ready for Vercel.
 
@@ -23,16 +20,12 @@ npm run check:todo # fails while any TODO placeholder is still on the built site
 
 | What | File |
 | --- | --- |
-| Headline, bio, availability, contact links, nav | `src/config/site.ts` |
-| Homepage proof cards | `src/content/proof.json` |
-| Marquee ticker | `src/content/ticker.json` |
+| Headline, bio, house rules, contact links, nav | `src/config/site.ts` |
+| Things I've made, kind words, the long way round, reading | `src/config/menu.ts` |
 | Mains (case studies) | `src/content/work/*.mdx` |
 | Side Dishes | `src/content/sides/*.md` |
 | Today's Specials | `src/content/now/index.md` |
-| Which look the site uses | `variant` in `src/config/site.ts` |
-| Colours and fonts, per look | `src/styles/tokens.css` |
-| Ramen-only layout touches | `src/styles/ramen.css` |
-| Stickers | `public/stickers/*.svg` |
+| Colours and fonts | `src/styles/tokens.css` |
 
 Any text containing `TODO` is highlighted on the page so gaps are easy to spot.
 Content files are type-checked at build time, so a missing frontmatter field fails the build.

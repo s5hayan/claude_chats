@@ -3,17 +3,18 @@
 
 @layer base {
   html {
-    background: var(--bg);
+    background: var(--table);
     color: var(--fg);
     font-family: var(--font-body);
     font-size: 17px;
-    line-height: 1.55;
+    line-height: 1.6;
     -webkit-text-size-adjust: 100%;
   }
   body {
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    background: var(--table);
   }
   main {
     flex: 1;
@@ -22,9 +23,9 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    font-weight: 800;
-    line-height: 0.95;
-    letter-spacing: -0.03em;
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.005em;
     text-wrap: balance;
   }
   p {
@@ -32,60 +33,87 @@
   }
   a {
     color: inherit;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+  }
+  a:hover {
+    color: var(--accent);
   }
   ::selection {
-    background: var(--yolk);
-    color: var(--on-accent);
+    background: var(--highlight);
+    color: var(--on-highlight);
   }
   :focus-visible {
-    outline: 3px solid var(--tomato);
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
   }
 }
 
 @layer components {
-  .container-page {
-    width: 100%;
-    max-width: var(--page-max);
+  /* The sheet of paper every page is printed on. */
+  .card {
+    width: min(100% - 2 * var(--gutter), var(--card-max));
     margin-inline: auto;
-    padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
-    padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    box-shadow: var(--card-shadow);
+    padding: clamp(28px, 6vw, 56px) clamp(20px, 6vw, 56px);
   }
   .label {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 500;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .ornament {
+    color: var(--accent);
+    letter-spacing: 0.6em;
+    font-size: 0.75rem;
+    text-align: center;
   }
   .btn {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     text-decoration: none;
-    border: var(--line-thin) solid var(--edge);
-    padding: 0.55em 1.1em;
-    background: var(--surface);
-    color: var(--on-surface);
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    border: 1px solid var(--fg);
+    padding: 0.7em 1.1em;
+    color: var(--fg);
+    background: transparent;
+    transition: background 0.15s ease, color 0.15s ease;
   }
   .btn:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 5px 5px 0 var(--shadow-colour);
-  }
-  .btn:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 var(--shadow-colour);
+    background: var(--fg);
+    color: var(--bg);
   }
   .btn-hot {
-    background: var(--tomato);
+    background: var(--accent);
+    border-color: var(--accent);
     color: var(--on-accent);
   }
-  .btn-yolk {
-    background: var(--yolk);
-    color: var(--on-accent);
+  .btn-hot:hover {
+    background: var(--fg);
+    border-color: var(--fg);
+    color: var(--bg);
+  }
+  /* A menu line: item name, dotted leader, "price" on the right. */
+  .leader-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .leader-row .dots {
+    flex: 1;
+    min-width: 1.5rem;
+    border-bottom: 2px dotted var(--rule);
+    transform: translateY(-0.3em);
   }
   /* Long-form text from MDX */
   .prose-menu {
@@ -95,28 +123,26 @@
     margin-top: 1em;
   }
   .prose-menu h2 {
-    font-size: clamp(1.75rem, 4vw, 2.5rem);
-    margin-top: 1.6em;
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    margin-top: 1.8em;
   }
   .prose-menu h3 {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
     margin-top: 1.4em;
   }
   .prose-menu ul {
-    list-style: square;
-    padding-left: 1.2em;
+    list-style: '— ';
+    padding-left: 1.4em;
   }
   .prose-menu ol {
     list-style: decimal;
     padding-left: 1.4em;
   }
-  .prose-menu a {
-    text-decoration-thickness: 2px;
-    text-underline-offset: 3px;
-    text-decoration-color: var(--tomato);
+  .prose-menu li + li {
+    margin-top: 0.35em;
   }
   .prose-menu strong {
-    font-weight: 700;
+    font-weight: 650;
   }
 }
 

@@ -1,87 +1,53 @@
 ---
 import { site } from '../config/site';
-import Sticker from './Sticker.astro';
-import Todo from './Todo.astro';
 
 const { email, linkedin, github } = site.contact;
-const ready = (value: string) => !value.includes('TODO');
 ---
 
 <section id="book" class="book" aria-labelledby="book-title">
-  <div class="container-page inner">
-    <div class="copy">
-      <p class="label">Reservations</p>
-      <h2 id="book-title">Book a Table</h2>
-      <p class="lede">
-        Want to swap notes on product or customer success, build something with AI agents, or come on a
-        food walk? Pull up a chair.
-      </p>
-    </div>
-    <ul class="links">
-      <li>
-        {ready(email) ? (
-          <a class="btn btn-yolk" href={`mailto:${email}`}>{email}</a>
-        ) : (
-          <span class="btn"><Todo text={email} /></span>
-        )}
-      </li>
-      <li>
-        {ready(linkedin) ? (
-          <a class="btn" href={linkedin} rel="me">LinkedIn ↗</a>
-        ) : (
-          <span class="btn"><Todo text={linkedin} /></span>
-        )}
-      </li>
-      <li>
-        <a class="btn" href={github} rel="me">GitHub ↗</a>
-      </li>
-    </ul>
-    <Sticker name="chilli" size={110} rotate={14} class="chilli" />
-  </div>
+  <p class="label">Reservations</p>
+  <h2 id="book-title">Book a Table</h2>
+  <p class="lede">
+    If you'd like to swap notes on product or customer success, build something with AI agents, or come along on a
+    food walk, pull up a chair. I read everything that lands in my inbox.
+  </p>
+  <ul class="links">
+    <li><a class="btn btn-hot" href={`mailto:${email}`}>{email}</a></li>
+    <li><a class="btn" href={linkedin} rel="me">LinkedIn ↗</a></li>
+    <li><a class="btn" href={github} rel="me">GitHub ↗</a></li>
+  </ul>
 </section>
 
 <style>
   .book {
-    background: var(--tomato);
-    color: var(--on-accent);
-    border-block: var(--line) solid var(--edge);
-  }
-  .inner {
-    position: relative;
     display: grid;
-    gap: 1.5rem;
-    padding-block: clamp(2.5rem, 6vw, 4.5rem);
-  }
-  .copy {
-    display: grid;
-    gap: 0.75rem;
-    max-width: 40rem;
+    justify-items: center;
+    gap: 0.9rem;
+    text-align: center;
+    margin-top: clamp(2.5rem, 7vw, 4rem);
+    padding-top: clamp(2rem, 6vw, 3rem);
+    border-top: 3px double var(--rule);
+    scroll-margin-top: 1rem;
   }
   h2 {
-    font-size: clamp(2.8rem, 9vw, 6rem);
+    font-size: clamp(2.2rem, 6vw, 3.2rem);
   }
   .lede {
-    font-size: 1.15rem;
-    font-weight: 500;
+    max-width: 46ch;
+    font-size: 1.1rem;
+    line-height: 1.5;
   }
   .links {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.9rem;
-    margin: 0;
+    justify-content: center;
+    gap: 0.7rem;
+    margin: 0.4rem 0 0;
     padding: 0;
     list-style: none;
   }
-  .inner :global(.chilli) {
-    position: absolute;
-    right: var(--gutter);
-    top: 1.5rem;
-  }
-  @media (max-width: 640px) {
-    .inner :global(.chilli) {
-      width: 70px;
-      height: 70px;
-      top: 1rem;
-    }
+  .links a {
+    text-transform: none;
+    letter-spacing: 0.02em;
   }
 </style>

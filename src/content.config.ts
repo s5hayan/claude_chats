@@ -37,28 +37,4 @@ const now = defineCollection({
   }),
 });
 
-// Marquee ticker items.
-const ticker = defineCollection({
-  loader: file('src/content/ticker.json'),
-  schema: z.object({
-    id: z.string(),
-    verb: z.string(), // "Watching", "Eating" ...
-    text: z.string(),
-  }),
-});
-
-// Homepage proof cards.
-const proof = defineCollection({
-  loader: file('src/content/proof.json'),
-  schema: z.object({
-    id: z.string(),
-    label: z.string(),
-    claim: z.string(),
-    number: z.string(),
-    context: z.string(),
-    colour: z.enum(['card', 'yolk', 'teal', 'tomato']).default('card'),
-    order: z.number(),
-  }),
-});
-
-export const collections = { work, sides, now, ticker, proof };
+export const collections = { work, sides, now };
