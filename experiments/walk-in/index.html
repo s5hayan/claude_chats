@@ -1,0 +1,529 @@
+<title>Shayan's Counter</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Monoton&family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap">
+<link rel="preload" as="image" href="assets/exterior.webp">
+<style>
+/* Layout: a sticky full-screen stage holding a 16:9 "world" sized to cover the screen.
+   Scrolling walks a camera through cut-out cartoon layers: street, curtain, room, counter. */
+
+/* Layout: a sticky full-screen stage; scrolling walks a camera through layered
+   flat illustrations (outside → curtain → room → your seat at the counter). */
+:root {
+  color-scheme: dark;
+  --night: #170f1a;      /* the street at night */
+  --ink: #1d1018;        /* every outline */
+  --curtain: #c8202f;
+  --lamp: #ffc857;       /* warm restaurant light */
+  --neon: #ff5d8f;
+  --cream: #fff1d6;
+  --muted: #d9c3a5;
+  --teal: #43d1c0;
+  --panel: #fff6e6;
+  --panel-ink: #2a1a20;
+
+  --display: 'Bagel Fat One', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+  --neon-font: 'Monoton', 'Bagel Fat One', sans-serif;
+  --body: 'Nunito', 'Trebuchet MS', system-ui, sans-serif;
+  --hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+}
+
+html, body { background: var(--night); color: var(--cream); }
+body { font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.scroller { height: 720vh; position: relative; }
+.stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: var(--night); }
+.world { position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
+.group, .plane { position: absolute; inset: 0; will-change: transform; }
+.sprite { position: absolute; display: block; height: auto; max-width: none; user-select: none; -webkit-user-drag: none; }
+.full { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.curtain-half { position: absolute; top: 0; bottom: 0; width: 50%; background: url(assets/curtain.webp) no-repeat; background-size: 200% 100%; }
+.curtain-half.l { left: 0; background-position: 0 0; transform-origin: 0 50%; }
+.curtain-half.r { right: 0; background-position: 100% 0; transform-origin: 100% 50%; }
+.neon { animation: flicker 6s infinite steps(1); filter: drop-shadow(0 0 18px rgb(255 93 143 / .7)); }
+@keyframes flicker { 0%, 18%, 22%, 61%, 64%, 100% { opacity: 1; filter: drop-shadow(0 0 18px rgb(255 93 143 / .7)); } 19%, 21%, 62% { opacity: .55; filter: none; } }
+.glow { position: absolute; border-radius: 50%; background: radial-gradient(circle, rgb(255 200 110 / .55), rgb(255 170 70 / .18) 45%, transparent 70%); pointer-events: none; animation: hum 3.2s ease-in-out infinite alternate; }
+@keyframes hum { to { opacity: .75; } }
+.amber { position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 62% 58% at 57% 42%, transparent 0%, rgb(40 14 0 / .15) 55%, rgb(10 4 2 / .8) 100%); }
+.hot { position: absolute; background: transparent; border: 0; border-radius: 10px; cursor: pointer; padding: 0; }
+.hot:hover, .hot:focus-visible { outline: 4px solid var(--lamp); outline-offset: 2px; box-shadow: 0 0 30px rgb(255 200 87 / .6); }
+.diner { cursor: pointer; transition: filter .15s; }
+.diner:hover { filter: brightness(1.15) drop-shadow(0 0 12px rgb(255 200 87 / .7)); }
+.loader { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: var(--night); transition: opacity .5s; }
+.loader.done { opacity: 0; pointer-events: none; }
+.loader span { font: 400 64px/1 var(--neon-font); color: var(--neon); text-shadow: 0 0 18px var(--neon); animation: flicker 2.5s infinite steps(1); }
+/* Overlay UI */
+.hud {
+  position: fixed; z-index: 20; display: flex; gap: 8px; align-items: center;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+  justify-content: space-between; pointer-events: none;
+}
+.hud > * { pointer-events: auto; }
+.pill {
+  font: 600 13px/1 var(--body); letter-spacing: .02em; color: var(--cream);
+  background: rgb(23 15 26 / .7); border: 2px solid var(--ink); border-radius: 999px;
+  padding: 9px 14px; cursor: pointer; backdrop-filter: blur(6px);
+  box-shadow: 0 0 0 2px rgb(255 241 214 / .18);
+}
+.pill:hover { background: var(--lamp); color: var(--ink); }
+.pill:focus-visible, .opt:focus-visible, .close:focus-visible, .tabs button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
+.brand { font-family: var(--display); font-size: 20px; color: var(--cream); text-shadow: 0 2px 0 var(--ink); }
+
+.hint {
+  position: fixed; z-index: 15; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+  transform: translateX(-50%); font: 22px/1.2 var(--hand); color: var(--cream);
+  text-align: center; text-shadow: 0 2px 0 var(--ink); transition: opacity .3s;
+}
+.hint span { display: block; animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateY(6px); } }
+
+.bubble {
+  position: fixed; z-index: 16; right: calc(50% + 150px); top: 22%;
+  width: min(400px, calc(100vw - 32px)); transform: scale(.9); transform-origin: 100% 60%;
+  background: var(--panel); color: var(--panel-ink); border: 4px solid var(--ink); border-radius: 26px;
+  padding: 18px 20px 20px; box-shadow: 6px 6px 0 var(--ink);
+  opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s cubic-bezier(.3,1.6,.5,1);
+}
+.bubble.show { opacity: 1; pointer-events: auto; transform: scale(1); }
+.bubble::after {
+  content: ""; position: absolute; right: -30px; top: 46%; width: 34px; height: 30px;
+  background: var(--panel); border: 4px solid var(--ink); border-left: 0; border-bottom: 0;
+  transform: skewY(-25deg); border-top-right-radius: 10px;
+}
+.bubble p { font: 26px/1.15 var(--hand); margin: 0 0 12px; }
+.opts { display: grid; gap: 8px; }
+.opt {
+  display: flex; align-items: center; gap: 10px; text-align: left; width: 100%;
+  font: 800 16px/1.2 var(--body); color: var(--panel-ink); background: #ffe2a8;
+  border: 3px solid var(--ink); border-radius: 14px; padding: 10px 12px; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink); transition: transform .12s, box-shadow .12s, background .12s;
+}
+.opt:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--ink); background: var(--lamp); }
+.opt small { display: block; font: 600 13px/1.3 var(--body); color: #6b4a45; }
+.opt .e { font-size: 22px; }
+
+/* The menu card that slides in beside the scene */
+.panel {
+  position: fixed; z-index: 30; top: 0; right: 0; bottom: 0; width: min(480px, 100vw);
+  background: var(--panel); color: var(--panel-ink); border-left: 4px solid var(--ink);
+  transform: translateX(105%); transition: transform .45s cubic-bezier(.2,.9,.2,1);
+  display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.panel.open { transform: none; }
+.panel-head {
+  display: flex; align-items: center; gap: 8px; justify-content: space-between;
+  padding-block: 16px 10px; padding-left: 22px; padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 3px dashed #d9c3a5;
+}
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tabs button {
+  font: 800 13px/1 var(--body); background: transparent; color: var(--panel-ink);
+  border: 2.5px solid var(--ink); border-radius: 999px; padding: 7px 11px; cursor: pointer;
+}
+.tabs button[aria-selected="true"] { background: var(--curtain); color: var(--cream); }
+.close {
+  font: 800 20px/1 var(--body); width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+  border: 3px solid var(--ink); background: #ffe2a8; color: var(--panel-ink); cursor: pointer;
+}
+.panel-body { overflow-y: auto; padding-block: 18px 40px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.panel h2 { font: 400 34px/1 var(--display); margin: 0 0 6px; color: var(--curtain); text-wrap: balance; }
+.panel .kicker { font: 21px/1.2 var(--hand); color: #6b4a45; margin: 0 0 18px; }
+.panel h3 { font: 800 17px/1.3 var(--body); margin: 0; }
+.panel p { margin: 0; max-width: 62ch; }
+.panel a { color: var(--curtain); font-weight: 800; }
+.dish { display: grid; gap: 4px; padding-block: 14px; border-bottom: 2px dotted #d9c3a5; }
+.dish .row { display: flex; gap: 8px; align-items: baseline; justify-content: space-between; }
+.dish .tag { font: 700 12px/1.2 var(--body); color: var(--curtain); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.dish p { color: #4c3436; font-size: 15px; }
+.stack { display: grid; gap: 14px; }
+.section-label { font: 800 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: #8a6a5e; margin-top: 22px !important; }
+
+/* Poster / diner focus card */
+.focus {
+  position: fixed; z-index: 40; inset: 0; display: grid; place-items: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: rgb(10 6 12 / .55); opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.focus.show { opacity: 1; pointer-events: auto; }
+.focus-card {
+  width: min(420px, 100%); background: var(--panel); color: var(--panel-ink);
+  border: 4px solid var(--ink); border-radius: 22px; padding: 20px 22px 22px; box-shadow: 8px 8px 0 var(--ink);
+  transform: rotate(-1.5deg) scale(.92); transition: transform .25s cubic-bezier(.3,1.6,.5,1);
+  display: grid; gap: 10px; position: relative;
+}
+.focus.show .focus-card { transform: rotate(-1.5deg) scale(1); }
+.focus-card h2 { font: 400 28px/1.05 var(--display); margin: 0; color: var(--curtain); text-wrap: balance; }
+.focus-card p { margin: 0; }
+.focus-card .who { font: 20px/1.2 var(--hand); color: #6b4a45; }
+.focus-card .close { position: absolute; top: -16px; right: -12px; }
+.focus-card a { color: var(--curtain); font-weight: 800; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+@media (max-width: 700px) {
+  .panel { top: auto; height: 78svh; width: 100vw; border-left: 0; border-top: 4px solid var(--ink); border-radius: 24px 24px 0 0; transform: translateY(105%); }
+  .panel.open { transform: none; }
+  .bubble { right: auto; left: 50%; top: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); transform: translateX(-50%) scale(.9); transform-origin: 50% 0; }
+  .bubble.show { transform: translateX(-50%) scale(1); }
+  .bubble::after { right: auto; left: 50%; top: -30px; transform: translateX(-50%) rotate(-90deg) skewY(-25deg); }
+  .bubble p { font-size: 23px; }
+  .brand { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .neon, .bob, .stir, .steam path, .blink, .lamp-glow, .hint span { animation: none !important; }
+  .steam path { opacity: .5; }
+}
+
+@media (prefers-reduced-motion: reduce) { .glow, .loader span { animation: none !important; } }
+</style>
+
+<div class="loader" id="loader" aria-hidden="true"><span>OPEN</span></div>
+
+<div class="hud">
+  <span class="brand">Shayan's</span>
+  <span style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+    <button class="pill" id="sound" type="button" aria-pressed="false">♪ Play the band</button>
+    <button class="pill" id="skip" type="button">Skip to my seat</button>
+  </span>
+</div>
+
+<p class="hint" id="hint"><span>Scroll to walk in</span>↓</p>
+
+<div class="bubble" id="bubble" role="dialog" aria-label="Shayan asks what you'd like">
+  <p>Hey, pull up a stool! What are you in the mood for?</p>
+  <div class="opts">
+    <button class="opt" type="button" data-open="about"><span class="e" aria-hidden="true">🧑‍🍳</span><span>A bit about me<small>Who's cooking, and how I got here</small></span></button>
+    <button class="opt" type="button" data-open="work"><span class="e" aria-hidden="true">🔥</span><span>A taste of my work<small>Things I've made at Segwise and before</small></span></button>
+    <button class="opt" type="button" data-open="likes"><span class="e" aria-hidden="true">📺</span><span>Things I'm into<small>Food, TV, teaching and writing</small></span></button>
+  </div>
+</div>
+
+
+<div class="scroller" id="scroller">
+  <div class="stage" id="stage">
+    <div class="world" id="world" aria-label="An illustrated walk into Shayan's restaurant">
+
+      <!-- INSIDE -->
+      <div class="group" id="interior">
+        <div class="plane" data-rate="0.35">
+          <img class="full" src="assets/interior.webp" alt="Inside Shayan's: a tall wall of posters, a kitchen hatch and a jazz band in the corner">
+          <button class="hot" type="button" data-poster="cook" style="left:40.1%;top:5.2%;width:8.0%;height:20.1%" aria-label="Poster: Anyone can cook"></button>
+        <button class="hot" type="button" data-poster="ship" style="left:49.7%;top:6.8%;width:7.8%;height:19.0%" aria-label="Poster: Ship it"></button>
+        <button class="hot" type="button" data-poster="fight" style="left:59.0%;top:3.3%;width:11.9%;height:24.1%" aria-label="Poster: Gojek versus Grab, round two"></button>
+        <button class="hot" type="button" data-poster="map" style="left:71.8%;top:9.1%;width:13.7%;height:33.3%" aria-label="Poster: Namma food map"></button>
+        <button class="hot" type="button" data-poster="tv" style="left:39.2%;top:27.6%;width:11.8%;height:13.8%" aria-label="Poster: Now showing"></button>
+        <button class="hot" type="button" data-poster="awesome" style="left:52.5%;top:29.2%;width:16.7%;height:10.9%" aria-label="Neon sign: awesome"></button>
+        <button class="hot" type="button" data-poster="rule1" style="left:39.1%;top:43.2%;width:8.0%;height:20.1%" aria-label="Poster: House rule number one"></button>
+        <button class="hot" type="button" data-poster="subway" style="left:71.7%;top:45.6%;width:13.4%;height:17.4%" aria-label="Poster: The long way round"></button>
+        <button class="hot" type="button" data-poster="band" style="left:13.4%;top:49.5%;width:24.7%;height:26.0%" aria-label="The house band: open Shayan's playlist"></button>
+        </div>
+        <div class="plane" data-rate="0.75" aria-hidden="true">
+          <div class="glow" style="left:24%;top:-6%;width:18%;aspect-ratio:1"></div>
+          <div class="glow" style="left:43%;top:-6%;width:18%;aspect-ratio:1"></div>
+          <div class="glow" style="left:60%;top:-6%;width:18%;aspect-ratio:1"></div>
+          <img class="sprite" src="assets/lamp.webp" alt="" style="left:29.5%;top:-3%;width:7%">
+          <img class="sprite" src="assets/lamp.webp" alt="" style="left:48.5%;top:-5%;width:7%">
+          <img class="sprite" src="assets/lamp.webp" alt="" style="left:65.5%;top:-3%;width:7%">
+        </div>
+        <div class="plane" data-rate="1.0">
+          <img class="sprite" id="chef" src="assets/chef-a.webp" alt="Shayan behind the counter in a backwards red cap and a yes-chef apron, stirring a pot" style="left:46%;top:26.5%;width:26%">
+          <img class="sprite" src="assets/counter.webp" alt="" aria-hidden="true" style="left:-4%;top:21%;width:108%">
+        </div>
+        <div class="plane" data-rate="1.3">
+          <img class="sprite diner" data-diner="sean" tabindex="0" role="button" src="assets/diner-left.webp" alt="The diner on the left: read what they said" style="left:-3%;top:56%;width:28%">
+          <img class="sprite diner" data-diner="simar" tabindex="0" role="button" src="assets/diner-right.webp" alt="The diner on the right: read what they said" style="left:80%;top:51%;width:16%">
+        </div>
+        <div class="amber" aria-hidden="true"></div>
+      </div>
+
+      <!-- OUTSIDE -->
+      <div class="group" id="outside" aria-hidden="true">
+        <div class="curtain-half l" id="curtL"></div>
+        <div class="curtain-half r" id="curtR"></div>
+        <img class="full" src="assets/exterior.webp" alt="">
+        <img class="sprite neon" src="assets/neon.webp" alt="" style="left:41%;top:-3%;width:18%">
+      </div>
+    </div>
+  </div>
+</div>
+
+<aside class="panel" id="panel" aria-labelledby="panel-title" aria-hidden="true">
+  <div class="panel-head">
+    <div class="tabs" role="tablist" aria-label="Menu">
+      <button role="tab" type="button" data-tab="about" aria-selected="false">About me</button>
+      <button role="tab" type="button" data-tab="work" aria-selected="false">My work</button>
+      <button role="tab" type="button" data-tab="likes" aria-selected="false">Things I'm into</button>
+    </div>
+    <button class="close" type="button" id="panelClose" aria-label="Close the menu">×</button>
+  </div>
+  <div class="panel-body" id="panelBody" tabindex="-1"></div>
+</aside>
+
+<div class="focus" id="focus" role="dialog" aria-modal="true" aria-labelledby="focusTitle">
+  <div class="focus-card">
+    <button class="close" type="button" id="focusClose" aria-label="Close">×</button>
+    <h2 id="focusTitle"></h2>
+    <p id="focusText"></p>
+    <p class="who" id="focusWho"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (t) => t * t * (3 - 2 * t);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------------- content ---------------- */
+  const panels = {
+    about: {
+      title: 'Who’s cooking',
+      kicker: 'Raised on Cartoon Network, fed by Bengaluru, and now making things of my own.',
+      html: `
+        <div class="stack">
+          <p>I've spent most of my life consuming things, from cartoons and films to food and other people's products, and somewhere along the way it all turned into taste. Now I get to put that to work, leading Product and Customer Success at Segwise.ai, shipping features myself with AI agents, and running food walks around the city.</p>
+          <p class="section-label">The long way round</p>
+          <div class="dish"><div class="row"><h3>EY</h3><span class="tag">2020–22</span></div><p>I started out checking the tech systems behind big brands, and kept spending my evenings building tools to make it faster, which probably said something.</p></div>
+          <div class="dish"><div class="row"><h3>Orinko</h3><span class="tag">2020</span></div><p>Two months helping a hydroponics startup sell through people instead of shelves. That's where I realised product management was the job I wanted.</p></div>
+          <div class="dish"><div class="row"><h3>The Product Folks</h3><span class="tag">2020–23</span></div><p>Found my people, helped run Insurjo, hosted OfficeHours and asked a lot of experienced PMs a lot of questions.</p></div>
+          <div class="dish"><div class="row"><h3>FamPay</h3><span class="tag">2022–23</span></div><p>Halfway through Master's applications when Brijesh called about an APM role. I said yes and spent a year on growth for an app built for teenagers.</p></div>
+          <div class="dish"><div class="row"><h3>Segwise</h3><span class="tag">2023–now</span></div><p>Followed Brijesh again, as one of the first people through the door, and I've been building there ever since.</p></div>
+        </div>`,
+    },
+    work: {
+      title: 'Things I’ve made',
+      kicker: 'Talk to a customer, spot what’s missing, build whatever fills the gap. Repeat.',
+      html: `
+        <p class="section-label" style="margin-top:0!important">At Segwise</p>
+        <div class="dish"><div class="row"><h3>A playable-ad business</h3><span class="tag">Zero to one</span></div><p>Customers kept asking for playable ads, so I started a line of them and set up a kitchen where AI agents do most of the cooking and I do the tasting.</p></div>
+        <div class="dish"><div class="row"><h3>A better first week</h3><span class="tag">Growth</span></div><p>Rebuilt the trial so new customers get a real result while they're still signing up.</p></div>
+        <div class="dish"><div class="row"><h3>A chat agent for ad data</h3><span class="tag">Product</span></div><p>People wanted to ask a question and get an answer, not set up another dashboard. We shipped it in under a week.</p></div>
+        <div class="dish"><div class="row"><h3>Tools that let marketers help themselves</h3><span class="tag">Building</span></div><p>A chat for making AI tags without waiting on an engineer, and a check that scores new ads before any money goes on them.</p></div>
+        <p class="section-label">Before that</p>
+        <div class="dish"><div class="row"><h3>Growth for a teen payments app</h3><span class="tag">FamPay</span></div><p>Onboarding, referrals, a subscription and custom UPI IDs, which were surprisingly fun to sell to sixteen-year-olds.</p></div>
+        <div class="dish"><div class="row"><h3>EY Infinity</h3><span class="tag">EY</span></div><p>Python tools that took hours of Oracle and SAP grunt work off auditors' plates.</p></div>
+        <div class="dish"><div class="row"><h3>A social commerce channel</h3><span class="tag">Orinko</span></div><p>No e-commerce experience, two months, and it beat the old model in its first month.</p></div>`,
+    },
+    likes: {
+      title: 'Off the clock',
+      kicker: 'Cartoon Network and Disney more or less raised me.',
+      html: `
+        <div class="dish"><div class="row"><h3>Hungry Mother Fakir</h3><span class="tag">Food</span></div><p>My food page: restaurant reviews, food walks and hosted meals around Bengaluru.</p></div>
+        <div class="dish"><div class="row"><h3>Pop-ups and the supper club</h3><span class="tag">Food</span></div><p>Placeholder: a line on your favourite pop-up goes here.</p></div>
+        <div class="dish"><div class="row"><h3>A ridiculous amount of TV</h3><span class="tag">Watching</span></div><p>Placeholder: what's on rotation right now.</p></div>
+        <div class="dish"><div class="row"><h3>Samiksha Foundation</h3><span class="tag">Teaching</span></div><p>Teaching kids from kindergarten to Grade 6 so they can keep up with school during cancer treatment.</p></div>
+        <p class="section-label">With your coffee</p>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/overachieving-underappreciated-the-stripe-story-74fa8b1d256b" target="_blank" rel="noopener">The Stripe story ↗</a></h3><span class="tag">2021</span></div></div>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/ask-app-not-to-track-is-apple-on-our-side-6953cb0464a0" target="_blank" rel="noopener">Is Apple on our side? ↗</a></h3><span class="tag">2021</span></div></div>
+        <div class="dish"><div class="row"><h3><a href="https://mohamedshayan5.medium.com/gojek-vs-grab-round-2-a2ee9eed4bf4" target="_blank" rel="noopener">Gojek vs Grab: Round 2 ↗</a></h3><span class="tag">2021</span></div></div>
+        <p class="section-label">Say hello</p>
+        <p>mohamedshayan5@gmail.com · <a href="https://www.linkedin.com/in/mohamed-shayan-22071998/" target="_blank" rel="noopener">LinkedIn ↗</a> · <a href="https://github.com/s5hayan" target="_blank" rel="noopener">GitHub ↗</a></p>`,
+    },
+  };
+  const posters = {
+    rule1: ['House rule Nº1', 'Talk to your customers every day. Even when they can’t put the problem into words, they’ll still show you what to build next.'],
+    cook: ['Anyone can cook', 'Gusteau was right. It just took me a while to believe him, and a few years of eating everyone else’s cooking first.'],
+    fight: ['Gojek vs Grab: Round 2', 'One of my 2021 essays, on two super-apps slugging it out across Southeast Asia.', 'https://mohamedshayan5.medium.com/gojek-vs-grab-round-2-a2ee9eed4bf4'],
+    awesome: ['awesome', 'My favourite word. You’ll hear it a lot in here.'],
+    tv: ['Now showing', 'Way too much TV. Placeholder: tell me what’s on rotation and it goes up here.'],
+    map: ['Namma food map', 'Hungry Mother Fakir, my food page: restaurant reviews, food walks and hosted meals around Bengaluru.'],
+    subway: ['The long way round', 'EY → Orinko → The Product Folks → FamPay → Segwise. Ask me for “a bit about me” for the full ride.'],
+    band: ['The house band', 'They’re playing my playlist tonight. The band button up top plays a stand-in tune; the real thing lives on Spotify.', 'https://open.spotify.com/playlist/6rlOT0zsfrYRCkmmjLycSI'],
+    ship: ['Ship it', 'Every PM should be shipping now. Coding agents took away the last good excuse, and getting over the fear of breaking things was the hardest part.'],
+  };
+  const diners = {
+    sean: ['“Never far from something very successful”', 'He’s one of these guys that is never going to be far away from something very successful, and will put in the hard yards to make it work.', 'Sean Chapman, growth consultant and Segwise customer'],
+    simar: ['“Deep product intuition”', 'He has deep product intuition and was great in anticipating our needs and implementing feedback fast.', 'Simardeep Singh, performance marketing manager and Segwise customer'],
+  };
+
+
+  /* ---------------- camera ---------------- */
+  const world = $('#world'), outside = $('#outside'), interior = $('#interior');
+  const curtL = $('#curtL'), curtR = $('#curtR');
+  const planes = [...interior.querySelectorAll('.plane')].map((el) => ({ el, rate: +el.dataset.rate }));
+  const hint = $('#hint'), bubble = $('#bubble');
+  const DOOR = [49.5, 60], CHEF = [59, 46];
+  let target = 0, shown = 0, seated = false, worldW = 0;
+
+  function sizeWorld() {
+    const stage = $('#stage');
+    const w = stage.clientWidth, h = stage.clientHeight;
+    worldW = Math.max(w, h * 16 / 9);
+    world.style.width = worldW + 'px';
+    world.style.height = worldW * 9 / 16 + 'px';
+  }
+  addEventListener('resize', sizeWorld);
+
+  const progress = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    return max > 0 ? clamp(scrollY / max) : 0;
+  };
+
+  function render(p) {
+    // walking up to the door, the curtain parting, and through
+    const approach = ease(clamp(p / 0.42));
+    outside.style.transformOrigin = interior.style.transformOrigin = `${DOOR[0]}% ${DOOR[1]}%`;
+    outside.style.transform = `scale(${1 + 5.5 * approach * approach})`;
+    outside.style.opacity = 1 - clamp((p - 0.33) / 0.07);
+    const part = ease(clamp((p - 0.1) / 0.22));
+    curtL.style.transform = `scaleX(${1 - 0.75 * part})`;
+    curtR.style.transform = `scaleX(${1 - 0.75 * part})`;
+
+    // inside: walk to the counter; nearer planes grow faster; drift so the chef ends up centred
+    const walk = ease(clamp((p - 0.28) / 0.62));
+    const shift = (50 - CHEF[0]) / 100 * worldW * walk;
+    interior.style.transform = `translateX(${shift}px) scale(${0.5 + 0.5 * ease(clamp(p / 0.4))})`;
+    interior.style.filter = `brightness(${0.55 + 0.45 * ease(clamp((p - 0.2) / 0.3))})`;
+    for (const { el, rate } of planes) {
+      el.style.transformOrigin = `${CHEF[0]}% ${CHEF[1]}%`;
+      el.style.transform = `scale(${1 + rate * 0.32 * walk})`;
+    }
+
+    hint.style.opacity = p < 0.06 ? 1 : 0;
+    const nowSeated = p > 0.93;
+    if (nowSeated !== seated) {
+      seated = nowSeated;
+      bubble.classList.toggle('show', seated && !panel.classList.contains('open'));
+      if (seated) chef.say(2600);
+    }
+    band.setMix(clamp((p - 0.15) / 0.3));
+  }
+
+  function tick() {
+    target = progress();
+    shown += (target - shown) * (reduce ? 1 : 0.12);
+    if (Math.abs(target - shown) < 0.0005) shown = target;
+    render(shown);
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------------- the chef: three hand-drawn frames, swapped like a TV cartoon ---------------- */
+  const chef = (() => {
+    const img = $('#chef');
+    const frames = ['a', 'b', 'c'].map((f) => { const i = new Image(); i.src = `assets/chef-${f}.webp`; return i.src; });
+    let i = 0, talkingUntil = 0;
+    if (!reduce) setInterval(() => {
+      if (performance.now() < talkingUntil) { img.src = frames[2]; return; }
+      i = 1 - i; img.src = frames[i];
+    }, 320);
+    return { say(ms) { talkingUntil = performance.now() + ms; img.src = frames[2]; } };
+  })();
+
+  /* ---------------- placeholder jazz, made in the browser ---------------- */
+  const band = (() => {
+    let ctx, master, filter, playing = false, nextTime = 0, step = 0, timer, mix = 0;
+    const bpm = 118, beat = 60 / bpm;
+    // ii–V–I–VI in C: Dm7, G7, Cmaj7, A7 (MIDI notes)
+    const chords = [[50, 53, 57, 60], [43, 47, 50, 53], [48, 52, 55, 59], [45, 49, 52, 55]];
+    const walks = [[38, 41, 45, 48], [43, 47, 50, 49], [36, 40, 43, 45], [33, 37, 40, 37]];
+    const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+    function voice(type, f, t, dur, vol, dest) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g).connect(dest); o.start(t); o.stop(t + dur + 0.05);
+    }
+    function ride(t, vol) {
+      const len = 0.25, buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 3);
+      const s = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+      s.buffer = buf; hp.type = 'highpass'; hp.frequency.value = 6500; g.gain.value = vol;
+      s.connect(hp).connect(g).connect(filter); s.start(t);
+    }
+    function schedule() {
+      while (nextTime < ctx.currentTime + 0.15) {
+        const bar = Math.floor(step / 4) % 4, b = step % 4;
+        voice('triangle', hz(walks[bar][b]), nextTime, beat * 0.9, 0.32, filter);              // walking bass
+        ride(nextTime, 0.18); ride(nextTime + beat * 0.66, b % 2 ? 0.12 : 0.06);                  // swung ride
+        if (b === 1 || b === 3 || (b === 2 && Math.random() < 0.4)) {                            // piano comps on the off-beats
+          const t = nextTime + beat * (b === 2 ? 0.66 : 0);
+          chords[bar].forEach((n) => voice('sine', hz(n + 12), t, beat * 0.55, 0.045, filter));
+        }
+        nextTime += beat; step++;
+      }
+    }
+    function start() {
+      if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        filter = ctx.createBiquadFilter(); filter.type = 'lowpass';
+        master = ctx.createGain(); master.gain.value = 0;
+        filter.connect(master).connect(ctx.destination);
+      }
+      ctx.resume(); nextTime = ctx.currentTime + 0.05; playing = true;
+      timer = setInterval(schedule, 25); apply();
+    }
+    function stop() { playing = false; clearInterval(timer); if (master) master.gain.setTargetAtTime(0, ctx.currentTime, 0.1); }
+    function apply() {
+      if (!ctx || !playing) return;
+      // outside it's muffled through the wall; inside it opens up
+      filter.frequency.setTargetAtTime(450 + 9000 * mix * mix, ctx.currentTime, 0.1);
+      master.gain.setTargetAtTime(0.35 + 0.45 * mix, ctx.currentTime, 0.1);
+    }
+    return {
+      toggle() { playing ? stop() : start(); return playing; },
+      setMix(m) { if (Math.abs(m - mix) > 0.01) { mix = m; apply(); } },
+    };
+  })();
+
+  const sound = $('#sound');
+  sound.addEventListener('click', () => {
+    const on = band.toggle();
+    sound.setAttribute('aria-pressed', String(on));
+    sound.textContent = on ? '♪ Band’s playing' : '♪ Play the band';
+  });
+
+  /* ---------------- menu panel ---------------- */
+  const panel = $('#panel'), body = $('#panelBody');
+  function openPanel(key) {
+    const c = panels[key];
+    body.innerHTML = `<h2 id="panel-title">${c.title}</h2><p class="kicker">${c.kicker}</p>${c.html}`;
+    document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === key)));
+    panel.classList.add('open'); panel.setAttribute('aria-hidden', 'false'); chef.say(1500);
+    bubble.classList.remove('show'); body.scrollTop = 0; body.focus({ preventScroll: true });
+  }
+  function closePanel() {
+    panel.classList.remove('open'); panel.setAttribute('aria-hidden', 'true');
+    if (seated) bubble.classList.add('show');
+  }
+  document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.open)));
+  document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => openPanel(b.dataset.tab)));
+  $('#panelClose').addEventListener('click', closePanel);
+
+  /* ---------------- posters and diners ---------------- */
+  const focus = $('#focus');
+  function showFocus([title, text, extra]) {
+    $('#focusTitle').textContent = title;
+    $('#focusText').textContent = text;
+    const who = $('#focusWho');
+    who.replaceChildren();
+    if (extra && extra.startsWith('http')) {
+      const a = document.createElement('a'); a.href = extra; a.target = '_blank'; a.rel = 'noopener'; a.textContent = extra.includes('spotify') ? 'Open the playlist on Spotify ↗' : 'Read it ↗';
+      who.append(a);
+    } else if (extra) who.textContent = extra;
+    focus.classList.add('show'); $('#focusClose').focus();
+  }
+  const hideFocus = () => focus.classList.remove('show');
+  document.querySelectorAll('[data-poster], [data-diner]').forEach((el) => {
+    const open = () => showFocus(el.dataset.poster ? posters[el.dataset.poster] : diners[el.dataset.diner]);
+    el.addEventListener('click', open);
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  });
+  $('#focusClose').addEventListener('click', hideFocus);
+  focus.addEventListener('click', (e) => { if (e.target === focus) hideFocus(); });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') { hideFocus(); closePanel(); } });
+
+  $('#skip').addEventListener('click', () => scrollTo({ top: document.documentElement.scrollHeight, behavior: reduce ? 'auto' : 'smooth' }));
+
+  const hideLoader = () => $('#loader').classList.add('done');
+  addEventListener('load', hideLoader);
+  setTimeout(hideLoader, 6000);
+  sizeWorld();
+  render(progress());
+  requestAnimationFrame(tick);
+})();
+</script>

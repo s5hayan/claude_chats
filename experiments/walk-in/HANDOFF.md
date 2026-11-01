@@ -31,7 +31,10 @@ and asks in a comic speech bubble what they're in the mood for. Choosing one sli
 
 | What | Where |
 | --- | --- |
-| Working scroll prototype (hand-drawn SVG placeholder art) | `prototype.html`, published at https://claude.ai/artifact/K8tAyekTsYyFGdBFm1w2Lw |
+| **Current prototype (v2, generated Foster's art)** | `index.html` + `assets/`, published at https://claude.ai/artifact/K8tAyekTsYyFGdBFm1w2Lw |
+| First prototype (hand-drawn SVG) | `prototype-v1-svg.html` |
+| Raw generated layers + layer prompts | `art/layers/raw/`, `art/prompts/layers/` |
+| Background keyer | `art/key.py` (magenta/green chroma → transparent WebP) |
 | Style test page (4 looks) | https://claude.ai/artifact/YCpmNPDPZpfY5Ct8sxsFe2 |
 | Style test images | `art/style-tests/` (A Pixar-style, B toy-brick, C storybook, D Foster's) |
 | Prompts used | `art/prompts/` (`scene.txt` + one style prefix per look) |
@@ -41,13 +44,15 @@ and asks in a comic speech bubble what they're in the mood for. Choosing one sli
 
 ## Plan
 
-1. **Character sheet**: done for both looks (`art/character/sheet-fosters.png`, `sheet-bricks.png`). Waiting on Shayan to confirm Foster's as the main look. Small fix needed: the cap visor must always point backwards.
-2. **Cut-out character parts** (head, torso, arms, spoon) for code animation: stir loop, blink, talk.
-3. **Scene layers**, each generated on a flat chroma background and keyed out: street + door,
-   curtain, back wall, each poster, lamps, band, counter, diners, place setting.
-4. **Assemble** into `prototype.html`, replacing the SVG placeholders. Mock up before full build.
-5. **Move into the Astro site**: real Spotify embed; the existing menu-card site stays as the
-   plain "lights on" fallback (screen readers, reduced motion, old devices, recruiters).
+1. Character sheets: done (`art/character/`). Foster's confirmed as the main look; toy-brick parked as a seasonal special.
+2. Character animation: done as three hand-drawn frames (stir A, stir B, talking C) swapped like a TV cartoon.
+3. Scene layers: done (street, neon, curtain, room, lamps, counter, two diners), keyed to transparent WebP.
+4. Assembly: v2 prototype done. Next polish ideas:
+   - posters as separate sprites (sharper, can wiggle on hover); remove the duplicate TV poster
+   - steam as a CSS/canvas loop instead of baked-in; more chef frames (chopping, waving hello on arrival)
+   - a proper loading screen and asset sizes check on mobile data
+   - band silhouettes bob in time with the music
+5. Move into the Astro site: real Spotify embed; the menu-card site stays as the plain "lights on" version.
 
 ## Open items
 
