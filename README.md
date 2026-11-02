@@ -1,6 +1,10 @@
 # Shayan's personal site
 
-A personal site laid out as a printed restaurant menu: a paper card on a wooden table, with
+The home page (`/`) is an illustrated walk into Shayan's restaurant: scroll to walk through the
+curtain, sit at the counter, and pick what you'd like to hear about. Its art lives in
+`public/walk-in/`, and its source and art pipeline in `experiments/walk-in/`.
+
+The menu-card version lives at `/menu/`: a personal site laid out as a printed restaurant menu: a paper card on a wooden table, with
 courses, dotted leaders and one deep red accent. It switches to a candlelit dark version when
 the reader's device is in dark mode. The menu is the permanent structure; future "seasons" can
 give it a new look without changing the content.

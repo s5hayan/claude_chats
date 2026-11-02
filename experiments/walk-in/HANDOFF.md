@@ -52,10 +52,10 @@ and asks in a comic speech bubble what they're in the mood for. Choosing one sli
    - steam as a CSS/canvas loop instead of baked-in; more chef frames (chopping, waving hello on arrival)
    - a proper loading screen and asset sizes check on mobile data
    - band silhouettes bob in time with the music
-5. Move into the Astro site: real Spotify embed; the menu-card site stays as the plain "lights on" version.
+5. Moved into the Astro site: done. The walk-in is `src/pages/index.astro` (art in `public/walk-in/`), the menu card moved to `/menu/`, and the band opens a real Spotify player. Edit the site version from now on; `index.html` here is the older standalone copy.
 
 ## Open items
 
-- GitHub pushes from the cloud session fail with 403 until Shayan reconnects GitHub
-  (https://claude.ai/connect-github). Until then, commits exist only in the session's container.
+- Pushing works again (branch `claude/busy-clarke-c0337c` on `s5hayan/claude_chats`). Shayan wants a fresh
+  `personal-website` repo; Claude can't create repos, so he creates it empty and grants the Claude app access.
 - The Google API key was pasted in chat; Shayan should rotate it in Google AI Studio after use.

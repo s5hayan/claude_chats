@@ -1,0 +1,516 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MenuHeader from '../components/MenuHeader.astro';
+import Todo from '../components/Todo.astro';
+import Gif from '../components/Gif.astro';
+import Note from '../components/Note.astro';
+import OrderTicket from '../components/OrderTicket.astro';
+import PlatePreview from '../components/PlatePreview.astro';
+import { site } from '../config/site';
+import { madeAtSegwise, madeBefore, kindWords, longWayRound, writing, type MadeItem } from '../config/menu';
+
+const sides = (await getCollection('sides'))
+  .filter(({ data }) => ['Food', 'Newsletter', 'Community'].includes(data.kind))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// Split the headline so the highlighted phrase is set in red italics.
+const [before, after] = site.headline.split(site.headlineHighlight);
+
+const courses = [
+  { numeral: 'I', emoji: '📜', name: 'House rules', note: 'the fine print', id: 'rules' },
+  { numeral: 'II', emoji: '🔥', name: "Things I've made", note: 'let him cook', id: 'made' },
+  { numeral: 'III', emoji: '📺', name: 'Off the clock', note: 'after the credits', id: 'sides' },
+  { numeral: 'IV', emoji: '⭐', name: 'Kind words', note: 'the reviews are in', id: 'kind-words' },
+  { numeral: 'V', emoji: '⏪', name: 'The long way round', note: 'previously on…', id: 'long-way' },
+  { numeral: 'VI', emoji: '☕', name: 'Reading', note: "director's commentary", id: 'reading' },
+];
+
+const sideEmoji: Record<string, string> = {
+  'hungry-mother-fakir': '🍛',
+  'pop-ups': '🍽️',
+  'see-hear-taste': '💌',
+  samiksha: '📚',
+  'the-product-folks': '🤝',
+};
+const sideGif: Record<string, { src: string; alt: string }> = {
+  'hungry-mother-fakir': {
+    src: 'https://media.tenor.com/DtO-uXg1KiwAAAAM/muppets-swedish-chef.gif',
+    alt: 'The Swedish Chef from the Muppets cooking chaotically',
+  },
+};
+
+const groups: { heading: string; items: MadeItem[] }[] = [
+  { heading: 'At Segwise, 2023 to now', items: madeAtSegwise },
+  { heading: 'Before that', items: madeBefore },
+];
+---
+
+<BaseLayout>
+  <section class="mast" aria-labelledby="hero-title">
+    <p class="label">{site.location} · {site.edition}</p>
+    <h1 id="hero-title">{site.name}</h1>
+    <p class="headline">{before}<em>{site.headlineHighlight}</em>{after}</p>
+    <p class="bio">{site.bio}</p>
+    <p class="status"><span class="dot" aria-hidden="true"></span>{site.status}</p>
+    <Note tilt={-3}>“Awesome” is still my favourite word. You've been warned.</Note>
+    <Gif
+      src="https://media.tenor.com/-gEj5ta6_FkAAAAM/ratatouille-chef.gif"
+      alt="Colette cooking in the kitchen in Ratatouille"
+      caption="“Anyone can cook.” Gusteau was right, it just took me a while to believe him."
+      side="right"
+      tilt={4}
+      top="40px"
+    />
+    <p class="ornament" aria-hidden="true">✦ ✦ ✦</p>
+  </section>
+
+  <nav class="contents" aria-labelledby="contents-title">
+    <p class="label" id="contents-title">Tonight's courses</p>
+    <ol>
+      {courses.map((c) => (
+        <li>
+          <a href={`#${c.id}`} class="leader-row">
+            <span class="c-emoji" aria-hidden="true">{c.emoji}</span>
+            <span class="c-name">{c.name}</span>
+            <small class="c-note">{c.note}</small>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="c-no">{c.numeral}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </nav>
+
+  <section id="rules" class="course" aria-labelledby="rules-title">
+    <MenuHeader numeral="I" course="The fine print" title="House rules" id="rules-title" />
+    <ol class="rule-list">
+      {site.houseRules.map((rule) => <li>{rule}</li>)}
+    </ol>
+  </section>
+
+  <section id="made" class="course" aria-labelledby="made-title">
+    <MenuHeader numeral="II" course="Let him cook" title="Things I've made" id="made-title" />
+    <p class="intro">
+      Most days I'm somewhere in the same loop of talking to a customer, spotting what's missing and building
+      whatever fills the gap. These are a few of the things that came out of it.
+    </p>
+    <p class="center"><Note tilt={-2}>Tap + on anything you'd like to hear more about, and it goes on your order ↓</Note></p>
+    {groups.map((group) => (
+      <div class="group">
+        <h3 class="label group-title">{group.heading}</h3>
+        <ul class="items">
+          {group.items.map((item) => (
+            <li class="item" data-plate data-emoji={item.emoji} data-gif={item.gif?.src} data-gif-alt={item.gif?.alt}>
+              <div class="leader-row">
+                <span class="i-name">{item.href ? <a href={item.href}>{item.name}</a> : item.name}</span>
+                <span class="dots" aria-hidden="true"></span>
+                <span class="i-tag">{item.tag}</span>
+                <button type="button" class="add" data-add={item.name} aria-pressed="false" aria-label={`Add ${item.name} to your order`}>+</button>
+              </div>
+              <p class="i-desc">
+                {item.description}
+                {item.href && (
+                  <>
+                    {' '}
+                    <a href={item.href} class="more" aria-label={`Read the story behind ${item.name}`}>
+                      Read the story →
+                    </a>
+                  </>
+                )}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </section>
+
+  <section id="sides" class="course" aria-labelledby="sides-title">
+    <MenuHeader numeral="III" course="After the credits" title="Off the clock" id="sides-title" />
+    <p class="intro">{site.offTheClock}</p>
+    <ul class="items">
+      {sides.map(({ id, data }) => (
+        <li class="item" data-plate data-emoji={sideEmoji[id]} data-gif={sideGif[id]?.src} data-gif-alt={sideGif[id]?.alt}>
+          <div class="leader-row">
+            <span class="i-name">{data.link ? <a href={data.link}>{data.title}</a> : data.title}</span>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="i-tag">{data.kind}</span>
+            <button type="button" class="add" data-add={data.title} aria-pressed="false" aria-label={`Add ${data.title} to your order`}>+</button>
+          </div>
+          <p class="i-desc"><Todo text={data.blurb} /></p>
+        </li>
+      ))}
+    </ul>
+    <p class="center"><a href="/sides/" class="more">Everything on the side →</a></p>
+  </section>
+
+  <section id="kind-words" class="course" aria-labelledby="kind-title">
+    <MenuHeader numeral="IV" course="The reviews are in" title="Kind words" id="kind-title" />
+    <p class="center"><Note tilt={2}>I didn't pay any of them, promise.</Note></p>
+    <div class="quotes">
+      {kindWords.map((k) => (
+        <figure class="quote">
+          <blockquote>“{k.quote}”</blockquote>
+          <figcaption>
+            <span class="q-name">{k.name}</span>
+            <span class="q-role">{k.role}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  <section id="long-way" class="course" aria-labelledby="long-title">
+    <MenuHeader numeral="V" course="Previously on…" title="The long way round" id="long-title" />
+    <p class="intro">Like any good recap, this one skips the boring episodes.</p>
+    <ol class="stops">
+      {longWayRound.map((s) => (
+        <li class="stop">
+          <p class="s-head"><span class="s-place">{s.place}</span><span class="s-years">{s.years}</span></p>
+          <p class="s-text">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section id="reading" class="course" aria-labelledby="reading-title">
+    <MenuHeader numeral="VI" course="Director's commentary" title="Reading" id="reading-title" />
+    <p class="intro">
+      A few essays from 2021, back when I spent my weekends taking apart why some tech companies win. I'd argue
+      with parts of them now, which feels like a good sign.
+    </p>
+    <ul class="items">
+      {writing.map((w) => (
+        <li class="item">
+          <div class="leader-row">
+            <span class="i-name"><a href={w.href}>{w.title}</a></span>
+            <span class="dots" aria-hidden="true"></span>
+            <span class="i-tag">{w.where} · {w.year}</span>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+  <PlatePreview />
+  <OrderTicket />
+</BaseLayout>
+
+<style>
+  /* Masthead */
+  .mast {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+  h1 {
+    font-size: clamp(3rem, 11vw, 5.6rem);
+    line-height: 0.92;
+  }
+  .headline {
+    max-width: 24ch;
+    font-family: var(--font-serif);
+    font-size: clamp(1.25rem, 3.4vw, 1.65rem);
+    line-height: 1.3;
+  }
+  .headline em {
+    color: var(--accent);
+  }
+  .bio {
+    max-width: 52ch;
+    color: var(--fg-muted);
+    font-size: 1.02rem;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55em;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    border: 1px solid var(--rule);
+    padding: 0.35em 0.9em;
+  }
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--herb);
+  }
+
+  /* Contents */
+  .contents {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: clamp(1.8rem, 5vw, 2.6rem);
+    padding: 1.2rem clamp(0.75rem, 3vw, 1.5rem);
+    border-block: 1px solid var(--rule);
+  }
+  .contents .label {
+    text-align: center;
+  }
+  .contents ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .contents a {
+    padding-block: 0.4rem;
+    text-decoration: none;
+  }
+  .c-emoji {
+    width: 1.6rem;
+    flex-shrink: 0;
+  }
+  .c-name {
+    font-family: var(--font-serif);
+    font-size: 1.12rem;
+  }
+  .c-note {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+  }
+  .c-no {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+  }
+  .contents a:hover .c-name {
+    color: var(--accent);
+  }
+  @media (max-width: 480px) {
+    .c-note {
+      display: none;
+    }
+  }
+
+  /* Courses */
+  .course {
+    position: relative;
+    display: grid;
+    gap: 1.5rem;
+    margin-top: clamp(3rem, 8vw, 4.5rem);
+    scroll-margin-top: 1rem;
+  }
+  .intro {
+    max-width: 54ch;
+    margin-inline: auto;
+    text-align: center;
+    font-size: 1.08rem;
+    line-height: 1.55;
+  }
+  .center {
+    text-align: center;
+  }
+
+  /* House rules */
+  .rule-list {
+    counter-reset: rule;
+    display: grid;
+    gap: 1.2rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .rule-list li {
+    counter-increment: rule;
+    display: grid;
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    gap: 0.6rem;
+    align-items: baseline;
+    font-size: 1.12rem;
+    line-height: 1.5;
+  }
+  .rule-list li::before {
+    content: counter(rule, upper-roman) '.';
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--accent);
+  }
+
+  /* Menu items */
+  .group {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .group-title {
+    text-align: center;
+    font-size: 0.72rem;
+    font-family: var(--font-mono);
+  }
+  .group + .group {
+    margin-top: 1rem;
+  }
+  .items {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .item {
+    display: grid;
+    gap: 0.3rem;
+  }
+  .i-name {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    line-height: 1.3;
+    min-width: 0;
+  }
+  .i-name a {
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+  }
+  .i-name a:hover {
+    text-decoration-color: var(--accent);
+  }
+  .i-tag {
+    flex-shrink: 0;
+    max-width: 45%;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .add {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 1.7rem;
+    height: 1.7rem;
+    margin-left: 0.35rem;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    align-self: center;
+    transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  .add:hover {
+    transform: rotate(90deg) scale(1.1);
+  }
+  .add[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--on-accent);
+    transform: none;
+  }
+  [data-plate] .dots {
+    transition: border-color 0.2s ease;
+  }
+  [data-plate]:hover .dots {
+    border-bottom-color: var(--accent);
+  }
+  [data-plate]:hover .i-name {
+    color: var(--accent);
+  }
+  .i-desc {
+    max-width: 60ch;
+    color: var(--fg-muted);
+    font-size: 0.97rem;
+  }
+  .more {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* Kind words */
+  .quotes {
+    display: grid;
+    gap: 1.6rem;
+  }
+  .quote {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    border-left: 2px solid var(--accent);
+  }
+  blockquote {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.12rem;
+    line-height: 1.5;
+  }
+  figcaption {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .q-role {
+    color: var(--fg-muted);
+  }
+
+  /* The long way round */
+  .stops {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .stop {
+    position: relative;
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0 1.5rem 1.8rem;
+    border-left: 1px dashed var(--rule);
+    margin-left: 0.4rem;
+  }
+  .stop:last-child {
+    border-left-color: transparent;
+    padding-bottom: 0;
+  }
+  .stop::before {
+    content: '';
+    position: absolute;
+    left: -0.4rem;
+    top: 0.35rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--accent);
+  }
+  .stop:last-child::before {
+    background: var(--accent);
+  }
+  .s-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2rem 0.8rem;
+  }
+  .s-place {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+  }
+  .s-years {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .s-text {
+    max-width: 60ch;
+    color: var(--fg-muted);
+  }
+</style>

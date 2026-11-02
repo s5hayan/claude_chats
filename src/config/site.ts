@@ -31,7 +31,7 @@ export const site = {
     github: 'https://github.com/s5hayan',
   },
   nav: [
-    { label: 'The Menu', href: '/' },
+    { label: 'The Menu', href: '/menu/' },
     { label: 'Mains', href: '/work/' },
     { label: 'Side Dishes', href: '/sides/' },
     { label: "Today's Specials", href: '/now/' },
