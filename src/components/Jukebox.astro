@@ -1,0 +1,34 @@
+---
+// Shayan's Spotify playlist, embedded. Loads lazily so it doesn't slow the page.
+interface Props {
+  playlistId?: string;
+}
+const { playlistId = '6rlOT0zsfrYRCkmmjLycSI' } = Astro.props;
+---
+
+<figure class="jukebox">
+  <iframe
+    title="Shayan's playlist on Spotify"
+    src={`https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator&theme=0`}
+    width="100%"
+    height="352"
+    loading="lazy"
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+  ></iframe>
+  <figcaption class="label">On the stereo · <a href={`https://open.spotify.com/playlist/${playlistId}`}>open in Spotify ↗</a></figcaption>
+</figure>
+
+<style>
+  .jukebox {
+    display: grid;
+    gap: 0.6rem;
+    margin: 2rem auto 0;
+    max-width: var(--measure);
+  }
+  iframe {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 12px;
+  }
+</style>
